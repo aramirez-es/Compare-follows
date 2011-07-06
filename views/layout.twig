@@ -1,14 +1,37 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE HTML>
 <html>
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 		<title>Compare your friend</title>
+		<link rel="stylesheet" href="{{ app.request.getBaseUrl }}/public/css/main.css" type="text/css" media="screen" title="main css" charset="utf-8">
 	</head>
 	<body>
-		<h1>Compare follows between users</h1>
-		{% block maincontent %}
-		<p>default content.</p>
-		{% endblock maincontent %}
+		<div id="main">
+			<header>
+				{% block header %}
+				<h1>Compara followers/followings entre usuarios.</h1>
+				{% endblock header %}
+			</header>
+			<section>
+				{% block maincontent %}
+				<p>default content.</p>
+				{% endblock maincontent %}
+			</section>
+			<footer>
+				{% block footer %}
+				<p>
+					<em>This project uses HTML5 and CSS3 so you need a modern browser to show it correctly.</em>
+				</p>
+				<p>
+					<em>
+						Project developed by
+						<a href="http://www.aramirez.es" rel="external">aramirez.es</a>
+						and hosted in
+						<a href="http://www.github.com/aramirez-es/Compare-follows" rel="external">Github</a>
+					</em>
+				</p>
+				{% endblock footer %}
+			</footer>
+		</div>
 	</body>
 </html>

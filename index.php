@@ -49,7 +49,13 @@ $app->error( function( \Exception $error )
 	}
 	
 	$code = ( $error instanceof HttpException ) ? $error->getStatusCode() : 500;
-	return new Response( 'Un error 500 de la ostia!', $code );
+	return new Response(
+		sprintf(
+			'Un error 500 de la ostia! <pre>%s</pre>',
+			$error->getMessage()
+		),
+		$code
+	);
 });
 
 /**
@@ -62,6 +68,12 @@ $app->error( function( \Exception $error )
 $app->get( '/', function() use ( $app )
 {
 	return $app['twig']->render( 'homepage.twig' );
+});
+
+$app->post( '/sent', function() use ( $app )
+{
+	$type = $app['request']->get( 'compare' );
+	return new Response( var_export( $type, true ), 200 );
 });
 
 /**

@@ -1,4 +1,35 @@
 {% extends 'layout.twig' %}
 {% block maincontent %}
-<h2>Homepage</h2>
+<h3>Intruduce hasta un máximo de 5 usuarios.</h3>
+<section id="list_users">
+	<figure id="user_1" class="users_figure">
+		{% set picture = '/public/images/default-user.png' %}
+		<img src="{{ user.picture|default( app.request.getBaseUrl ~ picture ) }}"
+			width="48" heigth="48" alt="{{ user.name|default('user name') }}" />
+		<p>
+			<figcaption>{{ user.name|default('user name') }}</figcaption>
+			<em>Followers: {{ user.followers|default(0) }} / Followings: {{ user.followings|default(0) }}</em> 
+		</p>
+		<form action="#" method="post">
+			<p>
+				<input type="search" name="search[name]" value="" id="user_search" 
+					autofocus="autofocus" required="required" pattern="^@\w{1,15}" />
+			</p>
+		</form>
+	</figure>
+	<form action="sent" method="post">
+		<input type="hidden" name="compare[users][]" value="" id="compare_users_0" required="required" />
+		<p>
+			<label id="type_followers">
+				Followers
+				<input type="radio" name="compare[type][]" value="followers" id="type_followers" checked="checked" />
+			</label>
+			<label for="type_followings">
+				Followings
+				<input type="radio" name="compare[type][]" value="followings" id="type_followings" />
+			</label>
+		</p>
+		<p><input type="submit" value="Compara!"></p>
+	</form>
+</section>
 {% endblock maincontent %}
