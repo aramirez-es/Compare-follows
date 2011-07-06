@@ -1,0 +1,21 @@
+/**
+ * Body
+ */
+body {
+	font-size: 1em;
+}
+
+/**
+ * users figure
+ */
+.users_figure {
+	background-color: #CCC;
+	border: 2px solid #898989;
+	border-radius: 15px;
+	width: 140px;
+	text-align: center;
+	padding: 10px 0;
+}
+.users_figure em {
+	font-size: 0.65em;
+}
