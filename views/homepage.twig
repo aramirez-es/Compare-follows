@@ -10,14 +10,16 @@
 			<figcaption>{{ user.name|default('user name') }}</figcaption>
 			<em>Followers: {{ user.followers|default(0) }} / Followings: {{ user.followings|default(0) }}</em> 
 		</p>
-		<form action="#" method="post">
+		<form action="{{ app.request.getBaseUrl }}/send" method="post" class="ajax_request">
+            <input type="hidden" name="action" id="action" value="search" />
 			<p>
 				<input type="search" name="search[name]" value="" id="user_search" 
 					autofocus="autofocus" required="required" pattern="^@\w{1,15}" />
 			</p>
 		</form>
 	</figure>
-	<form action="sent" method="post">
+	<form action="{{ app.request.getBaseUrl }}/send" method="post" class="ajax_request">
+        <input type="hidden" name="action" id="action" value="compare" />
 		<input type="hidden" name="compare[users][]" value="" id="compare_users_0" required="required" />
 		<p>
 			<label id="type_followers">

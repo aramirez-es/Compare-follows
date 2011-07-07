@@ -14,6 +14,9 @@ require_once ( __DIR__ . '/vendor/twig/lib/lib/Twig/Autoloader.php' );
 
 Twig_Autoloader::register();
 
+define( 'ACTION_SEARCH', 'search' );
+define( 'ACTION_COMPARE', 'compare' );
+
 /**
  * Use namespaces.
  */
@@ -70,10 +73,38 @@ $app->get( '/', function() use ( $app )
 	return $app['twig']->render( 'homepage.twig' );
 });
 
-$app->post( '/sent', function() use ( $app )
+/**
+ * Routing "/send" by POST method.
+ *
+ * Handle form sent and process action submited.
+ *
+ * @return String
+ */
+$app->post( '/send', function() use ( $app )
 {
-	$type = $app['request']->get( 'compare' );
-	return new Response( var_export( $type, true ), 200 );
+    $code   = 200;
+    $action = $app->escape( $app['request']->get( 'action' ) );
+
+    switch( $action )
+    {
+        case ACTION_SEARCH:
+        {
+            $response = 'Busca!';
+            break;
+        }
+        case ACTION_COMPARE:
+        {
+            $response = 'Compara!';
+            break;
+        }
+        default:
+        {
+            $code = 500;
+            $response = 'Action not valid.';
+        }
+    }
+
+	return new Response( json_encode( $response ), $code );
 });
 
 /**
