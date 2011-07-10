@@ -1,0 +1,3 @@
+[submodule "vendor/adapter/twitter/twitteroauth"]
+	path = vendor/adapter/twitter/twitteroauth
+	url = git://github.com/abraham/twitteroauth.git
