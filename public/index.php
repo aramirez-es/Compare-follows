@@ -9,8 +9,8 @@
 ini_set( 'display_errors', true );
 error_reporting( E_ALL );
 
-require_once ( __DIR__ . '/silex.phar' );
-require_once ( __DIR__ . '/vendor/twig/lib/lib/Twig/Autoloader.php' );
+require_once ( __DIR__ . '/../silex.phar' );
+require_once ( __DIR__ . '/../vendor/twig/lib/lib/Twig/Autoloader.php' );
 
 Twig_Autoloader::register();
 
@@ -35,8 +35,8 @@ $app = new Silex\Application();
  * Services declaration.
  */
 $app->register( new Silex\Extension\TwigExtension(), array(
-	'twig.path'			=> ( __DIR__ . '/views' ),
-	'twig.class_path'	=> ( __DIR__ . '/vendor/twig/lib' )
+	'twig.path'			=> ( __DIR__ . '/../views' ),
+	'twig.class_path'	=> ( __DIR__ . '/../vendor/twig/lib' )
 ));
 
 /**
@@ -50,7 +50,7 @@ $app->error( function( \Exception $error )
 	{
 		return new Response( 'un 404 del copón!', 404 );
 	}
-	
+
 	$code = ( $error instanceof HttpException ) ? $error->getStatusCode() : 500;
 	return new Response(
 		sprintf(
