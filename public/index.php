@@ -31,6 +31,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 $app = new Silex\Application();
 
+$app->register( new Silex\Extension\SessionExtension() );
+
 /**
  * Services declaration.
  */
