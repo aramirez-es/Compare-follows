@@ -11,6 +11,8 @@ error_reporting( E_ALL );
 
 require_once ( __DIR__ . '/../silex.phar' );
 require_once ( __DIR__ . '/../vendor/twig/lib/lib/Twig/Autoloader.php' );
+require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthAdapter.class.php' );
+require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthStep.class.php' );
 
 Twig_Autoloader::register();
 
@@ -21,8 +23,8 @@ define( 'ACTION_COMPARE', 'compare' );
  * Use namespaces.
  */
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception;
+use Adapter\Twitter;
 
 /**
  * Declarate of application Silex microframework.
@@ -31,15 +33,28 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 $app = new Silex\Application();
 
-$app->register( new Silex\Extension\SessionExtension() );
-
 /**
- * Services declaration.
+ * Services and ertensions declaration.
  */
+$app->register( new Silex\Extension\SessionExtension() );
 $app->register( new Silex\Extension\TwigExtension(), array(
 	'twig.path'			=> ( __DIR__ . '/../views' ),
 	'twig.class_path'	=> ( __DIR__ . '/../vendor/twig/lib' )
 ));
+$app['twitter'] = $app->share( function() use ( $app )
+{
+    return new Twitter\TwitterAuthStep( $app['session'] );
+});
+$app['twitter.customer_key']    = 'dhtbnJJRdbQz3u55u9dig';
+$app['twitter.user_password']   = 'ZbABdtNjXZF10DsJOcjEnnlq4qXoW00BQaZRy2YMY';
+$app['twitter.callback_url']    = 'http://local.dev:8888/callback.php';
+$app['twitter.adapter']         = $app->share( function () use ( $app )
+{
+    return new Twitter\TwitterAuthAdapter(
+        $app['twitter.customer_key'],
+        $app['twitter.user_password']
+    );
+} );
 
 /**
  * Error method to handle errors of type 404 or 500.
@@ -72,7 +87,51 @@ $app->error( function( \Exception $error )
  */
 $app->get( '/', function() use ( $app )
 {
-	return $app['twig']->render( 'homepage.twig' );
+    $template_2_render = 'homepage.twig';
+
+    if ( $app['twitter']->isFirstCall() )
+    {
+        $app['twitter']->regenerateStorage();
+        $app['twitter']->setNeedSignin( true );
+
+        $template_2_render = 'twitter/signin.twig';
+    }
+
+	return $app['twig']->render( $template_2_render );
+});
+
+/**
+ * Routing "/twitter-signin" by GET method.
+ *
+ * It's the page for sign in with twitter.
+ *
+ * @return String
+ */
+$app->get( '/twitter-signin', function() use ( $app )
+{
+    if ( $app['twitter']->getNeedSignin() )
+    {
+        $request_token = $app['twitter.adapter']->getRequestToken( $app['twitter.callback_url'] );
+
+        $app['twitter']->set( 'oauth_token', $request_token['oauth_token'] );
+        $app['twitter']->set( 'oauth_token_secret', $request_token['oauth_token_secret'] );
+
+        unset( $request_token );
+
+        if( $app['twitter.adapter']->isResponseSuccess() )
+        {
+            /** @todo Redirec by silex system. */
+            header('Location: ' . $app['twitter.adapter']->getAuthorizeURL(
+                $app['twitter']->get( 'oauth_token' )
+            ) );
+            exit;
+        }
+
+        /** @todo Show a friendly message to client. */
+        die( 'Inténtelo más tarde.' );
+    }
+
+    header('Location: ' . $app['request']->getBasePath() . '/' );
 });
 
 /**
