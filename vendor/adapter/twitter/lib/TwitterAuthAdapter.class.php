@@ -41,7 +41,12 @@ class TwitterAuthAdapter
             throw new \RuntimeException( 'Required parameters not founds.' );
         }
 
-        $this->twitter_api = new \TwitterOAuth( $customer_key, $user_password );
+        $this->twitter_api = new \TwitterOAuth(
+            $customer_key,
+            $user_password,
+            $oauth_token,
+            $oauth_token_secret
+        );
     }
 
     /**
