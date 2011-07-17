@@ -88,7 +88,6 @@ $app->get( '/', function() use ( $app )
 
     if ( $app['twitter']->isFirstCall() )
     {
-
         $app['twitter']->regenerateStorage();
         $app['twitter']->setNeedSignin( true );
 
@@ -104,9 +103,8 @@ $app->get( '/', function() use ( $app )
         );
     }
 
-//    var_dump($app['twitter.adapter']->get('account/verify_credentials')->id);
-//    var_dump($app['twitter.adapter']->get('followers/ids'));
-	return $app['twig']->render( $template_2_render );
+    $signed_user = $app['twitter.adapter']->get( 'account/verify_credentials' );
+	return $app['twig']->render( $template_2_render, array( 'signed_user' => $signed_user ) );
 });
 
 /**
