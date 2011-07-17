@@ -1,0 +1,7 @@
+{% extends 'layout.twig' %}
+{% block maincontent %}
+<h3 class="error">Ha ocurrido un error, pruebe de nuevo.</h3>
+<a title="Sign in with Twitter" href="{{ app.request.getBasePath }}/twitter-signin">
+    <img src="{{ app.request.getBasePath }}/images/lighter.png" alt="Sign in with Twitter"/>
+</a>
+{% endblock maincontent %}

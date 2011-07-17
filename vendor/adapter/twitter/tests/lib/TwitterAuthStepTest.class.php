@@ -85,8 +85,9 @@ class TwitterAuthStepTest extends PHPUnit_Framework_TestCase
             'With empty storage'            => array( array(), true ),
             'With required storage twitter' => array(
                 array(
-                    'twitter.oauth_token'           => uniqid(),
-                    'twitter.oauth_token_secret'    => uniqid()
+                    'twitter.access_token'                      => microtime(),
+                    'twitter.access_token.oauth_token'          => uniqid(),
+                    'twitter.access_token.oauth_token_secret'   => uniqid()
                 ),
                 false
             ),

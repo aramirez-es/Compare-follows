@@ -6,9 +6,6 @@
  * @author Alberto Ramírez.
  */
 
-ini_set( 'display_errors', true );
-error_reporting( E_ALL );
-
 require_once ( __DIR__ . '/../silex.phar' );
 require_once ( __DIR__ . '/../vendor/twig/lib/lib/Twig/Autoloader.php' );
 require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthAdapter.class.php' );
@@ -91,6 +88,7 @@ $app->get( '/', function() use ( $app )
 
     if ( $app['twitter']->isFirstCall() )
     {
+
         $app['twitter']->regenerateStorage();
         $app['twitter']->setNeedSignin( true );
 
@@ -98,9 +96,16 @@ $app->get( '/', function() use ( $app )
     }
     else
     {
-        var_dump ( 'no es first call' );
+        $app['twitter.adapter'] = new Twitter\TwitterAuthAdapter(
+            $app['twitter.customer_key'],
+            $app['twitter.user_password'],
+            $app['twitter']->get( 'access_token.oauth_token' ),
+            $app['twitter']->get( 'access_token.oauth_token_secret' )
+        );
     }
 
+//    var_dump($app['twitter.adapter']->get('account/verify_credentials')->id);
+//    var_dump($app['twitter.adapter']->get('followers/ids'));
 	return $app['twig']->render( $template_2_render );
 });
 
@@ -124,21 +129,19 @@ $app->get( '/twitter-signin', function() use ( $app )
 
         if( $app['twitter.adapter']->isResponseSuccess() )
         {
-            /** @todo Redirec by silex system. */
-            header('Location: ' . $app['twitter.adapter']->getAuthorizeURL(
+            $authorize_url = $app['twitter.adapter']->getAuthorizeURL(
                 $app['twitter']->get( 'oauth_token' )
-            ) );
-            exit;
+            );
+            return $app->redirect( $authorize_url );
         }
 
         $app['twitter']->regenerateStorage();
-        /** @todo Show a friendly message to client. */
-        die( 'Inténtelo más tarde.' );
+        $app['twitter']->setNeedSignin( true );
+
+        return $app['twig']->render( 'twitter/error_response.twig' );
     }
 
-    /** @todo Redirec by silex system. */
-    header('Location: ' . $app['request']->getBasePath() . '/' );
-    exit;
+    return $app->redirect( $app['request']->getBasePath() . '/' );
 });
 
 /**
@@ -151,15 +154,15 @@ $app->get( '/twitter-signin', function() use ( $app )
 $app->get( 'receive-response-twitter', function() use ( $app )
 {
     $request_auth_token = $app['request']->get( 'oauth_token' );
+    $url_2_redirect     = '/twitter-signin';
+    $need_signin        = true;
+
     if ( !$app['twitter']->get( 'oauth_token' ) || empty( $request_auth_token )
         || $app['twitter']->get( 'oauth_token' ) !== $app['request']->get( 'oauth_token' ) )
     {
         $app['twitter']->regenerateStorage();
-        $app['twitter']->setNeedSignin( true );
-
-        /** @todo Redirec by silex system. */
-        header('Location: ' . $app['request']->getBasePath() . '/' );
-        exit;
+        $app['twitter']->setNeedSignin( $need_signin );
+        return $app->redirect( $app['request']->getBasePath() . $url_2_redirect );
     }
 
     $app['twitter.adapter'] = new Twitter\TwitterAuthAdapter(
@@ -169,28 +172,29 @@ $app->get( 'receive-response-twitter', function() use ( $app )
         $app['twitter']->get( 'oauth_token_secret' )
     );
 
-    $app['twitter']->set( 'access_token', $app['twitter.adapter']->getAccessToken(
+    $access_token = $app['twitter.adapter']->getAccessToken(
         $app['request']->get( 'oauth_verifier' )
-    ));
+    );
 
+    $app['twitter']->set( 'access_token', microtime() );
+    $app['twitter']->set( 'access_token.oauth_token', $access_token['oauth_token'] );
+    $app['twitter']->set( 'access_token.oauth_token_secret', $access_token['oauth_token_secret'] );
     $app['twitter']->set( 'oauth_token', null );
     $app['twitter']->set( 'oauth_token_secret', null );
 
     if ( $app['twitter.adapter']->isResponseSuccess() )
     {
         $app['twitter']->set( 'verified', uniqid() );
-        $app['twitter']->setNeedSignin( false );
-        /** @todo Redirec by silex system. */
-        header('Location: ' . $app['request']->getBasePath() . '/' );
-        exit;
+        $need_signin = false;
+        $url_2_redirect = '/';
     }
     else
     {
         $app['twitter']->regenerateStorage();
-        $app['twitter']->setNeedSignin( true );
-        /** @todo Redirec by silex system. */
-        header('Location: ' . $app['request']->getBasePath() . '/' );
     }
+
+    $app['twitter']->setNeedSignin( $need_signin );
+    return $app->redirect( $app['request']->getBasePath() . $url_2_redirect );
 });
 
 /**

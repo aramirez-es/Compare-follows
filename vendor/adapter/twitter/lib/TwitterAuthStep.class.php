@@ -14,8 +14,8 @@ class TwitterAuthStep
 
     public function __construct( $storage )
     {
+        $storage->start();
         $this->storage = $storage;
-        $this->storage->start();
     }
 
     /**
@@ -27,9 +27,11 @@ class TwitterAuthStep
     {
         return
         (
-            !$this->storage->has( $this->prefix . 'oauth_token' )
+            false === $this->get( 'access_token' )
             ||
-            !$this->storage->has( $this->prefix . 'oauth_token_secret' )
+            false === $this->get( 'access_token.oauth_token' )
+            ||
+            false === $this->get( 'access_token.oauth_token_secret' )
         );
     }
 
