@@ -3,8 +3,6 @@
 require_once __DIR__ . '/../../lib/TwitterAuthStep.class.php';
 require_once ( __DIR__ . '/../../../../../silex.phar' );
 
-ini_set( 'display_errors' , true );
-
 use Adapter\Twitter\TwitterAuthStep;
 
 /**
