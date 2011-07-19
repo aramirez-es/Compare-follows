@@ -196,6 +196,27 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $this->AssertFalse( $this->twitter_proxy->requestTokenIsEqualToSaved( $request_mock ) );
         $this->AssertTrue( $this->twitter_proxy->requestTokenIsEqualToSaved( $request_mock ) );
     }
+
+    public function testRegenerateStepsProcess()
+    {
+        $methods_steps_mock = array( 'setNeedSignin', 'regenerateStorage' );
+        $twitter_steps      = $this->getMock(
+            'TwitterAuthStep',
+            $methods_steps_mock,
+            array(),
+            '',
+            false
+        );
+        $twitter_steps->expects( $this->once() )->method( 'regenerateStorage' );
+        $twitter_steps->expects( $this->once() )
+            ->method( 'setNeedSignin' )
+            ->with( $this->isType( PHPUnit_Framework_Constraint_IsType::TYPE_BOOL ) );
+
+        $twitter_adapter = new Twitter\TwitterAuthAdapter( 'customerkey', 'pass' );
+
+        $this->twitter_proxy = new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_steps );
+        $this->twitter_proxy->regenerateStepsProcess( false );
+    }
 }
 
 ?>

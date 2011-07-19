@@ -109,6 +109,17 @@ class TwitterAuthProxy
 
         return ( !empty( $request_token ) && ( $request_token === $storage_token ) );
     }
+
+    /**
+     * This methods call to regenerate the storage system and then set if user need sign in or not.
+     *
+     * @param boolean $need_signin Set if user need sing in or not.
+     */
+    public function regenerateStepsProcess( $need_signin = true )
+    {
+        $this->twitter_steps->regenerateStorage( true );
+        $this->twitter_steps->setNeedSignin( $need_signin );
+    }
 }
 
 ?>
