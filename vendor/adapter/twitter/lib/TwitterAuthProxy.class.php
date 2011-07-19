@@ -117,7 +117,11 @@ class TwitterAuthProxy
      */
     public function regenerateStepsProcess( $need_signin = true )
     {
-        $this->twitter_steps->regenerateStorage( true );
+        if ( $need_signin )
+        {
+            $this->twitter_steps->regenerateStorage();
+        }
+
         $this->twitter_steps->setNeedSignin( $need_signin );
     }
 }

@@ -197,7 +197,13 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $this->AssertTrue( $this->twitter_proxy->requestTokenIsEqualToSaved( $request_mock ) );
     }
 
-    public function testRegenerateStepsProcess()
+    /**
+     * @dataProvider dataProviderForRegenerateStepsProcess
+     *
+     * @param boolean $need_signin Set if user need sign in or not.
+     * @param Object $expects_calls Object that represent number calls to regenerate.
+     */
+    public function testRegenerateStepsProcess( $need_signin, $expects_calls )
     {
         $methods_steps_mock = array( 'setNeedSignin', 'regenerateStorage' );
         $twitter_steps      = $this->getMock(
@@ -207,7 +213,7 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
             '',
             false
         );
-        $twitter_steps->expects( $this->once() )->method( 'regenerateStorage' );
+        $twitter_steps->expects( $expects_calls )->method( 'regenerateStorage' );
         $twitter_steps->expects( $this->once() )
             ->method( 'setNeedSignin' )
             ->with( $this->isType( PHPUnit_Framework_Constraint_IsType::TYPE_BOOL ) );
@@ -215,7 +221,28 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $twitter_adapter = new Twitter\TwitterAuthAdapter( 'customerkey', 'pass' );
 
         $this->twitter_proxy = new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_steps );
-        $this->twitter_proxy->regenerateStepsProcess( false );
+        $this->twitter_proxy->regenerateStepsProcess( ( null === $need_signin ) ?: $need_signin );
+    }
+
+    /**
+     * @return array
+     */
+    public function dataProviderForRegenerateStepsProcess()
+    {
+        return array(
+            'Call with need sign in should call to regenerate storage' => array(
+                true,
+                $this->once()
+            ),
+            'Call without need sign in should call to regenerate storage' => array(
+                null,
+                $this->once()
+            ),
+            'Call with do not need sign in should not call to regenerate storage' => array(
+                false,
+                $this->never()
+            )
+        );
     }
 }
 

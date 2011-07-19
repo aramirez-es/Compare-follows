@@ -1,5 +1,5 @@
 <?php
-
+ini_set( 'display_errors' , true );
 /**
  * Main file of project.
  *
@@ -10,6 +10,7 @@ require_once ( __DIR__ . '/../silex.phar' );
 require_once ( __DIR__ . '/../vendor/twig/lib/lib/Twig/Autoloader.php' );
 require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthAdapter.class.php' );
 require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthStep.class.php' );
+require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthProxy.class.php' );
 
 Twig_Autoloader::register();
 
@@ -33,25 +34,27 @@ $app = new Silex\Application();
 /**
  * Services and ertensions declaration.
  */
+// Session.
 $app->register( new Silex\Extension\SessionExtension() );
+// Twig.
 $app->register( new Silex\Extension\TwigExtension(), array(
 	'twig.path'			=> ( __DIR__ . '/../views' ),
 	'twig.class_path'	=> ( __DIR__ . '/../vendor/twig/lib' )
 ));
-$app['twitter'] = $app->share( function() use ( $app )
-{
-    return new Twitter\TwitterAuthStep( $app['session'] );
-});
+// Twitter.
 $app['twitter.customer_key']    = 'dhtbnJJRdbQz3u55u9dig';
 $app['twitter.user_password']   = 'ZbABdtNjXZF10DsJOcjEnnlq4qXoW00BQaZRy2YMY';
 $app['twitter.callback_url']    = 'http://local.dev:8888/receive-response-twitter';
-$app['twitter.adapter']         = $app->share( function () use ( $app )
+$app['twitter'] = $app->share( function() use ( $app )
 {
-    return new Twitter\TwitterAuthAdapter(
+    $twitter_step       = new Twitter\TwitterAuthStep( $app['session'] );
+    $twitter_adapter    = new Twitter\TwitterAuthAdapter(
         $app['twitter.customer_key'],
         $app['twitter.user_password']
     );
-} );
+
+    return new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_step );
+});
 
 /**
  * Error method to handle errors of type 404 or 500.
@@ -86,24 +89,22 @@ $app->get( '/', function() use ( $app )
 {
     $template_2_render = 'homepage.twig';
 
-    if ( $app['twitter']->isFirstCall() )
+    if ( $app['twitter']->twitter_steps->isFirstCall() )
     {
-        $app['twitter']->regenerateStorage();
-        $app['twitter']->setNeedSignin( true );
-
+        $app['twitter']->regenerateStepsProcess();
         $template_2_render = 'twitter/signin.twig';
     }
     else
     {
-        $app['twitter.adapter'] = new Twitter\TwitterAuthAdapter(
+        $app['twitter']->twitter_adapter = new Twitter\TwitterAuthAdapter(
             $app['twitter.customer_key'],
             $app['twitter.user_password'],
-            $app['twitter']->get( 'access_token.oauth_token' ),
-            $app['twitter']->get( 'access_token.oauth_token_secret' )
+            $app['twitter']->twitter_steps->get( 'access_token.oauth_token' ),
+            $app['twitter']->twitter_steps->get( 'access_token.oauth_token_secret' )
         );
     }
 
-    $signed_user = $app['twitter.adapter']->get( 'account/verify_credentials' );
+    $signed_user = $app['twitter']->twitter_adapter->get( 'account/verify_credentials' );
 	return $app['twig']->render( $template_2_render, array( 'signed_user' => $signed_user ) );
 });
 
@@ -116,26 +117,16 @@ $app->get( '/', function() use ( $app )
  */
 $app->get( '/twitter-signin', function() use ( $app )
 {
-    if ( $app['twitter']->getNeedSignin() )
+    if ( $app['twitter']->twitter_steps->getNeedSignin() )
     {
-        $request_token = $app['twitter.adapter']->getRequestToken( $app['twitter.callback_url'] );
+        $app['twitter']->getTokenAndSaveIt( $app['twitter.callback_url'] );
 
-        $app['twitter']->set( 'oauth_token', $request_token['oauth_token'] );
-        $app['twitter']->set( 'oauth_token_secret', $request_token['oauth_token_secret'] );
-
-        unset( $request_token );
-
-        if( $app['twitter.adapter']->isResponseSuccess() )
+        if ( $app['twitter']->twitter_adapter->isResponseSuccess() )
         {
-            $authorize_url = $app['twitter.adapter']->getAuthorizeURL(
-                $app['twitter']->get( 'oauth_token' )
-            );
-            return $app->redirect( $authorize_url );
+            return $app->redirect( $app['twitter']->getAuthorizeURLFromTokenSaved() );
         }
 
-        $app['twitter']->regenerateStorage();
-        $app['twitter']->setNeedSignin( true );
-
+        $app['twitter']->regenerateStepsProcess();
         return $app['twig']->render( 'twitter/error_response.twig' );
     }
 
@@ -151,48 +142,30 @@ $app->get( '/twitter-signin', function() use ( $app )
  */
 $app->get( 'receive-response-twitter', function() use ( $app )
 {
-    $request_auth_token = $app['request']->get( 'oauth_token' );
-    $url_2_redirect     = '/twitter-signin';
-    $need_signin        = true;
-
-    if ( !$app['twitter']->get( 'oauth_token' ) || empty( $request_auth_token )
-        || $app['twitter']->get( 'oauth_token' ) !== $app['request']->get( 'oauth_token' ) )
+    if ( !$app['twitter']->requestTokenIsEqualToSaved( $app['request'] ) )
     {
-        $app['twitter']->regenerateStorage();
-        $app['twitter']->setNeedSignin( $need_signin );
-        return $app->redirect( $app['request']->getBasePath() . $url_2_redirect );
+        $app['twitter']->regenerateStepsProcess();
+        return $app->redirect( $app['request']->getBasePath() . '/twitter-signin' );
     }
 
-    $app['twitter.adapter'] = new Twitter\TwitterAuthAdapter(
+    $app['twitter']->twitter_adapter = new Twitter\TwitterAuthAdapter(
         $app['twitter.customer_key'],
         $app['twitter.user_password'],
-        $app['twitter']->get( 'oauth_token' ),
-        $app['twitter']->get( 'oauth_token_secret' )
+        $app['twitter']->twitter_steps->get( 'oauth_token' ),
+        $app['twitter']->twitter_steps->get( 'oauth_token_secret' )
     );
 
-    $access_token = $app['twitter.adapter']->getAccessToken(
-        $app['request']->get( 'oauth_verifier' )
-    );
+    $app['twitter']->saveUserAsVerified( $app['request'] );
 
-    $app['twitter']->set( 'access_token', microtime() );
-    $app['twitter']->set( 'access_token.oauth_token', $access_token['oauth_token'] );
-    $app['twitter']->set( 'access_token.oauth_token_secret', $access_token['oauth_token_secret'] );
-    $app['twitter']->set( 'oauth_token', null );
-    $app['twitter']->set( 'oauth_token_secret', null );
-
-    if ( $app['twitter.adapter']->isResponseSuccess() )
-    {
-        $app['twitter']->set( 'verified', uniqid() );
-        $need_signin = false;
-        $url_2_redirect = '/';
-    }
-    else
+    if ( $app['twitter']->twitter_adapter->isResponseSuccess() )
     {
         $app['twitter']->regenerateStorage();
+        return $app->redirect( $app['request']->getBasePath() . '/' );
     }
 
-    $app['twitter']->setNeedSignin( $need_signin );
-    return $app->redirect( $app['request']->getBasePath() . $url_2_redirect );
+    $app['twitter']->regenerateStorage();
+    return $app->redirect( $app['request']->getBasePath() . '/twitter-signin' );
+
 });
 
 /**
