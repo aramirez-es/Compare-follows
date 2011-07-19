@@ -9,7 +9,32 @@ namespace Adapter\Twitter;
  */
 class TwitterAuthStep
 {
+    /**
+     * Prefix to token confirmed.
+     *
+     * @var string
+     */
+    const CONFIRMED_TOKEN = 'accesstoken.';
+
+    /**
+     * Prefix to token requested.
+     *
+     * @var string
+     */
+    const REQUESTED_TOKEN = '';
+
+    /**
+     * Prefix to storage.
+     *
+     * @var string
+     */
     protected $prefix = 'twitter.';
+
+    /**
+     * Storage system.
+     *
+     * @var Object
+     */
     protected $storage = null;
 
     public function __construct( $storage )

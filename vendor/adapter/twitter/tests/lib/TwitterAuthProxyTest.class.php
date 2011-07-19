@@ -244,6 +244,39 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
             )
         );
     }
+
+    public function testRebuildAuthTokenByConfirmedToken()
+    {
+        $twitter_adapter    = new Twitter\TwitterAuthAdapter( 'customerkey', 'pass' );
+        $twitter_steps      = $this->getMock( 'TwitterAuthStep', array( 'get' ), array(), '', false );
+        $twitter_steps->expects( $this->exactly( 2 ) )
+            ->method( 'get' )
+            ->with( $this->logicalAnd(
+                $this->stringStartsWith( Twitter\TwitterAuthStep::CONFIRMED_TOKEN ),
+                $this->logicalOr(
+                    $this->stringContains( 'oauth_token' ),
+                    $this->stringContains( 'oauth_token_secret' )
+                )
+            ) );
+
+        $this->twitter_proxy = new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_steps );
+        $this->twitter_proxy->rebuildAuthToken( Twitter\TwitterAuthStep::CONFIRMED_TOKEN );
+    }
+
+    public function testRebuildAuthTokenByRequestedToken()
+    {
+        $twitter_adapter    = new Twitter\TwitterAuthAdapter( 'customerkey', 'pass' );
+        $twitter_steps      = $this->getMock( 'TwitterAuthStep', array( 'get' ), array(), '', false );
+        $twitter_steps->expects( $this->exactly( 2 ) )
+            ->method( 'get' )
+            ->with( $this->logicalOr(
+                $this->equalTo( 'oauth_token' ),
+                $this->equalTo( 'oauth_token_secret' )
+            ) );
+
+        $this->twitter_proxy = new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_steps );
+        $this->twitter_proxy->rebuildAuthToken( Twitter\TwitterAuthStep::REQUESTED_TOKEN );
+    }
 }
 
 ?>

@@ -124,6 +124,22 @@ class TwitterAuthProxy
 
         $this->twitter_steps->setNeedSignin( $need_signin );
     }
+
+    /**
+     * Re-build the adapter object with new token properties.
+     *
+     * @param string $rebuild_type Type of rebuild represented by a string.
+     */
+    public function rebuildAuthToken( $rebuild_type )
+    {
+        $adapter_class_name     = get_class( $this->twitter_adapter );
+        $this->twitter_adapter  = new $adapter_class_name(
+            $this->twitter_adapter->last_customer_key,
+            $this->twitter_adapter->last_user_password,
+            $this->twitter_steps->get( $rebuild_type . 'oauth_token' ),
+            $this->twitter_steps->get( $rebuild_type . 'oauth_token_secret' )
+        );
+    }
 }
 
 ?>

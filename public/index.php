@@ -1,5 +1,5 @@
 <?php
-ini_set( 'display_errors' , true );
+
 /**
  * Main file of project.
  *
@@ -96,16 +96,12 @@ $app->get( '/', function() use ( $app )
     }
     else
     {
-        $app['twitter']->twitter_adapter = new Twitter\TwitterAuthAdapter(
-            $app['twitter.customer_key'],
-            $app['twitter.user_password'],
-            $app['twitter']->twitter_steps->get( 'access_token.oauth_token' ),
-            $app['twitter']->twitter_steps->get( 'access_token.oauth_token_secret' )
-        );
+        $app['twitter']->rebuildAuthToken( Twitter\TwitterAuthStep::CONFIRMED_TOKEN );
     }
 
-    $signed_user = $app['twitter']->twitter_adapter->get( 'account/verify_credentials' );
-	return $app['twig']->render( $template_2_render, array( 'signed_user' => $signed_user ) );
+	return $app['twig']->render( $template_2_render, array(
+        'signed_user' => $app['twitter']->twitter_adapter->get( 'account/verify_credentials' )
+    ) );
 });
 
 /**
@@ -148,22 +144,16 @@ $app->get( 'receive-response-twitter', function() use ( $app )
         return $app->redirect( $app['request']->getBasePath() . '/twitter-signin' );
     }
 
-    $app['twitter']->twitter_adapter = new Twitter\TwitterAuthAdapter(
-        $app['twitter.customer_key'],
-        $app['twitter.user_password'],
-        $app['twitter']->twitter_steps->get( 'oauth_token' ),
-        $app['twitter']->twitter_steps->get( 'oauth_token_secret' )
-    );
-
+    $app['twitter']->rebuildAuthToken( Twitter\TwitterAuthStep::REQUESTED_TOKEN );
     $app['twitter']->saveUserAsVerified( $app['request'] );
 
     if ( $app['twitter']->twitter_adapter->isResponseSuccess() )
     {
-        $app['twitter']->regenerateStorage();
+        $app['twitter']->regenerateStepsProcess( false );
         return $app->redirect( $app['request']->getBasePath() . '/' );
     }
 
-    $app['twitter']->regenerateStorage();
+    $app['twitter']->regenerateStepsProcess();
     return $app->redirect( $app['request']->getBasePath() . '/twitter-signin' );
 
 });

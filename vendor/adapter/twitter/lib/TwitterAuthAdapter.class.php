@@ -26,6 +26,20 @@ class TwitterAuthAdapter
     protected $twitter_api = null;
 
     /**
+     * Last customer key that object used.
+     *
+     * @var string
+     */
+    public $last_customer_key = null;
+
+    /**
+     * Last user password that object used.
+     *
+     * @var string
+     */
+    public $last_user_password = null;
+
+    /**
      * Construct of class, check required params and init the API.
      *
      * @param string $customer_key Customer key to connect with Twitter.
@@ -40,6 +54,9 @@ class TwitterAuthAdapter
         {
             throw new \RuntimeException( 'Required parameters not founds.' );
         }
+
+        $this->last_customer_key    = $customer_key;
+        $this->last_user_password   = $user_password;
 
         $this->twitter_api = new \TwitterOAuth(
             $customer_key,
