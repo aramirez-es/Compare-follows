@@ -14,7 +14,7 @@ class TwitterAuthStep
      *
      * @var string
      */
-    const CONFIRMED_TOKEN = 'accesstoken.';
+    const CONFIRMED_TOKEN = 'access_token.';
 
     /**
      * Prefix to token requested.
