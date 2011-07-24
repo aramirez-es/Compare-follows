@@ -15,7 +15,11 @@ body {
 	width: 140px;
 	text-align: center;
 	padding: 10px 0;
+    float: left;
 }
 .users_figure em {
 	font-size: 0.65em;
+}
+#searcher {
+    clear: both;
 }

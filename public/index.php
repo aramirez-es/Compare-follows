@@ -1,5 +1,7 @@
 <?php
 
+ini_set('display_errors', true);
+
 /**
  * Main file of project.
  *
@@ -8,7 +10,7 @@
 
 require_once ( __DIR__ . '/../silex.phar' );
 require_once ( __DIR__ . '/../vendor/twig/lib/lib/Twig/Autoloader.php' );
-require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthAdapter.class.php' );
+require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthModel.class.php' );
 require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthStep.class.php' );
 require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthProxy.class.php' );
 
@@ -48,7 +50,7 @@ $app['twitter.callback_url']    = 'http://local.dev:8888/receive-response-twitte
 $app['twitter'] = $app->share( function() use ( $app )
 {
     $twitter_step       = new Twitter\TwitterAuthStep( $app['session'] );
-    $twitter_adapter    = new Twitter\TwitterAuthAdapter(
+    $twitter_adapter    = new Twitter\TwitterAuthModel(
         $app['twitter.customer_key'],
         $app['twitter.user_password']
     );
@@ -99,8 +101,9 @@ $app->get( '/', function() use ( $app )
         $app['twitter']->rebuildAuthToken( Twitter\TwitterAuthStep::CONFIRMED_TOKEN );
     }
 
+    $signed_user = $app['twitter']->twitter_adapter->verifyCredentials();
 	return $app['twig']->render( $template_2_render, array(
-        'signed_user' => $app['twitter']->twitter_adapter->get( 'account/verify_credentials' )
+        'signed_user' => $signed_user
     ) );
 });
 
@@ -168,13 +171,18 @@ $app->get( 'receive-response-twitter', function() use ( $app )
 $app->post( '/send', function() use ( $app )
 {
     $code   = 200;
+    $content_type = 'text/html';
     $action = $app->escape( $app['request']->get( 'action' ) );
 
     switch( $action )
     {
         case ACTION_SEARCH:
         {
-            $response = 'Busca!';
+            $search_form = $app['request']->get( 'search' );
+            $response = $app['twitter']->twitter_adapter->getUserByUsername(
+                $app->escape( $search_form['name'] )
+            );
+            $content_type = 'application/json';
             break;
         }
         case ACTION_COMPARE:
@@ -189,7 +197,7 @@ $app->post( '/send', function() use ( $app )
         }
     }
 
-	return new Response( json_encode( $response ), $code );
+	return new Response( json_encode( $response ), $code, array( 'Content-Type' => $content_type ) );
 });
 
 /**
