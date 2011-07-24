@@ -29,13 +29,11 @@ ManipulateResponse =
         var oUser = oReponse;
         var oFigure = $(oForm).parent();
 
-        $(oFigure).find("figcaption")[0].innerText = oUser.name;
-        $(oFigure).find("img")
-            .attr("src", oUser.picture)
-            .attr("alt", oUser.name);
-        $(oFigure).find("em")[0]
-            .innerText = "Followers: " + oUser.followers
-            + " / Followings: " + oUser.followings;
+        $(oForm).attr("action", "#");
+        $(oFigure).find("figcaption").text(oUser.name);
+        $(oFigure).find("img").attr("src", oUser.picture).attr("alt", oUser.name);
+        $(oFigure).find("em").text("Followers: " + oUser.followers + " / Followings: " + oUser.followings);
+        $(oFigure).find("input[type=search]").attr("disabled", "disabled").blur();
     },
     error: function()
     {
