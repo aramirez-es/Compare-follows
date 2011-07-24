@@ -5,6 +5,16 @@
  */
 $(document).ready(function()
 {
+    // Configurate loading ajax content.
+    $("#loading").ajaxStart(function()
+    {
+        $(this).show();
+    });
+    $("#loading").ajaxStop(function()
+    {
+        $(this).hide();
+    });
+
     // Handle form sent to convert its in ajax request.
     Forms.handleSent("ajax_request", ManipulateResponse);
 });
@@ -14,12 +24,10 @@ $(document).ready(function()
  */
 ManipulateResponse =
 {
-    success: function(oReponse)
+    success: function(oReponse, oForm)
     {
         var oUser = oReponse;
-//        var oUser = jQuery.parseJSON(oReponse);
-        var oFigure = $("#user_1");
-//        $(oFigure).after($(oFigure).clone());
+        var oFigure = $(oForm).parent();
 
         $(oFigure).find("figcaption")[0].innerText = oUser.name;
         $(oFigure).find("img")
@@ -29,6 +37,13 @@ ManipulateResponse =
             .innerText = "Followers: " + oUser.followers
             + " / Followings: " + oUser.followings;
     },
-    error: function(){alert("Error");},
+    error: function()
+    {
+        $("#message")
+            .text("User not found.")
+            .slideDown("fast")
+            .delay(2000)
+            .fadeOut("slow");
+    },
     timeout: function(){alert("Timeout");}
 };

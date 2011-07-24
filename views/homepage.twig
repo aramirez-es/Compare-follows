@@ -3,22 +3,8 @@
 <h2>Bienvenido {{ signed_user.screen_name }}</h2>
 <h3>Intruduce hasta un máximo de 5 usuarios.</h3>
 <section id="list_users">
-	<figure id="user_1" class="users_figure">
-		{% set picture = '/images/default-user.png' %}
-		<img src="{{ user.picture|default( app.request.getBasePath ~ picture ) }}"
-			width="48" heigth="48" alt="{{ user.name|default('user name') }}" />
-		<p>
-			<figcaption>{{ user.name|default('user name') }}</figcaption>
-			<em>Followers: {{ user.followers|default(0) }} / Followings: {{ user.followings|default(0) }}</em>
-		</p>
-		<form action="{{ app.request.getBasePath }}/send" method="post" class="ajax_request">
-            <input type="hidden" name="action" value="search" />
-			<p>
-				<input type="search" name="search[name]" value="" autofocus="autofocus"
-					required="required" pattern="^@\w{1,15}" />
-			</p>
-		</form>
-	</figure>
+    <div id="message" style="display: none"></div>
+    {% include 'user.twig' %}
 </section>
 <section id="searcher">
 	<form action="{{ app.request.getBasePath }}/send" method="post" class="ajax_request">

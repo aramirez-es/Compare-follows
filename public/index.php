@@ -168,36 +168,18 @@ $app->get( 'receive-response-twitter', function() use ( $app )
  *
  * @return String
  */
-$app->post( '/send', function() use ( $app )
+$app->post( '/search-user', function() use ( $app )
 {
-    $code   = 200;
-    $content_type = 'text/html';
-    $action = $app->escape( $app['request']->get( 'action' ) );
+    $search_form    = $app['request']->get( 'search' );
+    $response       = $app['twitter']->twitter_adapter->getUserByUsername(
+        $app->escape( $search_form['name'] )
+    );
 
-    switch( $action )
-    {
-        case ACTION_SEARCH:
-        {
-            $search_form = $app['request']->get( 'search' );
-            $response = $app['twitter']->twitter_adapter->getUserByUsername(
-                $app->escape( $search_form['name'] )
-            );
-            $content_type = 'application/json';
-            break;
-        }
-        case ACTION_COMPARE:
-        {
-            $response = 'Compara!';
-            break;
-        }
-        default:
-        {
-            $code = 500;
-            $response = 'Action not valid.';
-        }
-    }
-
-	return new Response( json_encode( $response ), $code, array( 'Content-Type' => $content_type ) );
+	return new Response(
+        json_encode( $response ),
+        ( null != $response ) ? 200 : 404,
+        array( 'Content-Type' => 'application/json' )
+    );
 });
 
 /**

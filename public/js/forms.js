@@ -27,15 +27,15 @@ Forms =
                     data: $(oForm).serialize(),
                     success: function(oReponse)
                     {
-                        return self.onAjaxSuccess(oManipulateResponse, oReponse);
+                        return self.onAjaxSuccess(oManipulateResponse, oReponse, oForm);
                     },
                     error: function()
                     {
-                        return self.onAjaxError(oManipulateResponse);
+                        return self.onAjaxError(oManipulateResponse, oForm);
                     },
                     timeout: function()
                     {
-                        return self.onAjaxTimeout(oManipulateResponse);
+                        return self.onAjaxTimeout(oManipulateResponse, oForm);
                     }
                 });
 
@@ -50,9 +50,9 @@ Forms =
      * @param Object oManipulateResponse Object to manipulate response.
      * @param Object oReponse Data of server.
      */
-    onAjaxSuccess: function(oManipulateResponse, oReponse)
+    onAjaxSuccess: function(oManipulateResponse, oReponse, oForm)
     {
-        oManipulateResponse.success(oReponse);
+        oManipulateResponse.success(oReponse, oForm);
     },
 
     /**
@@ -60,9 +60,9 @@ Forms =
      *
      * @param Object oManipulateResponse Object to manipulate response.
      */
-    onAjaxError: function(oManipulateResponse)
+    onAjaxError: function(oManipulateResponse, oForm)
     {
-        oManipulateResponse.error();
+        oManipulateResponse.error(oForm);
     },
 
     /**
@@ -70,8 +70,8 @@ Forms =
      *
      * @param Object oManipulateResponse Object to manipulate response.
      */
-    onAjaxTimeout: function(oManipulateResponse)
+    onAjaxTimeout: function(oManipulateResponse, oForm)
     {
-        oManipulateResponse.timeout();
+        oManipulateResponse.timeout(oForm);
     }
 };
