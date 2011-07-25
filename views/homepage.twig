@@ -1,7 +1,7 @@
 {% extends 'layout.twig' %}
 {% block maincontent %}
-<h2>Bienvenido {{ signed_user.screen_name }}</h2>
-<h3>Intruduce hasta un máximo de 5 usuarios.</h3>
+<h2>Welcome {{ signed_user.screen_name }}</h2>
+<h3>Enter up to 5 users.</h3>
 <section id="list_users">
 	<figure id="user_1" class="users_figure">
 		{% set picture = '/images/default-user.png' %}
@@ -32,7 +32,7 @@
 				<input type="radio" name="compare[type][]" value="followings" id="type_followings" />
 			</label>
 		</p>
-		<p><input type="submit" value="Compara!"></p>
+		<p><input type="submit" value="Compare!"></p>
 	</form>
 </section>
 {% endblock maincontent %}

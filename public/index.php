@@ -32,7 +32,7 @@ use Adapter\Twitter;
 $app = new Silex\Application();
 
 /**
- * Services and ertensions declaration.
+ * Services and extension declarations.
  */
 // Session.
 $app->register( new Silex\Extension\SessionExtension() );
@@ -81,7 +81,7 @@ $app->error( function( \Exception $error )
 /**
  * Routing "/" by GET method.
  *
- * It's the homepage of web application.
+ * The homepage of web application.
  *
  * @return String
  */
@@ -107,7 +107,7 @@ $app->get( '/', function() use ( $app )
 /**
  * Routing "/twitter-signin" by GET method.
  *
- * It's the page for sign in with twitter.
+ * Page for signing in with twitter.
  *
  * @return String
  */
@@ -132,7 +132,7 @@ $app->get( '/twitter-signin', function() use ( $app )
 /**
  * Routing "/receive-response-twitter" by GET method.
  *
- * It's the page for twitter callback.
+ * Page for the twitter callback.
  *
  * @return String
  */
@@ -174,12 +174,12 @@ $app->post( '/send', function() use ( $app )
     {
         case ACTION_SEARCH:
         {
-            $response = 'Busca!';
+            $response = 'Search!';
             break;
         }
         case ACTION_COMPARE:
         {
-            $response = 'Compara!';
+            $response = 'Compare!';
             break;
         }
         default:
