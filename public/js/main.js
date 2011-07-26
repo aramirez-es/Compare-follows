@@ -32,7 +32,13 @@ $(document).ready(function()
     // Configurate loading ajax content.
     $("#loading").ajaxStart(function()
     {
+        var self = this;
         $(this).show();
+        setTimeout(function()
+        {
+            $(self).hide();
+            showErrorMessage("Network do not respond.");
+        }, 10000);
     });
     $("#loading").ajaxStop(function()
     {
@@ -70,5 +76,8 @@ ManipulateResponse =
     {
         showErrorMessage("User not found.");
     },
-    timeout: function(){alert("Timeout");}
+    timeout: function()
+    {
+        showErrorMessage("Network do not respond.");
+    }
 };
