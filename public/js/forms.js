@@ -10,7 +10,7 @@ Forms =
      *
      * @param string class_name Form class name.
      */
-    handleSent: function(sClassName, oManipulateResponse)
+    handleSent: function(sClassName, oManipulateResponse, fCallbackPreSend)
     {
         var self = this;
 
@@ -18,6 +18,11 @@ Forms =
             $(this).submit(function(eEvent)
             {
                 var oForm = eEvent.target;
+
+                if (typeof fCallbackPreSend !== "undefined" && false === fCallbackPreSend(oForm))
+                {
+                    return false;
+                }
 
                 jQuery.ajax(
                 {

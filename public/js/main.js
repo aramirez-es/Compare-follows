@@ -3,6 +3,30 @@
  *
  * @author Alberto Ramírez.
  */
+
+/**
+ * Function to show an error message.
+ *
+ * @param sMessage string
+ */
+showErrorMessage = function(sMessage)
+{
+    $("#message").text(sMessage)
+        .slideDown("fast")
+        .delay(2000)
+        .fadeOut("slow");
+}
+
+/**
+ * Instance of class to manage list of users.
+ *
+ * @var UserList
+ */
+var oInstanceUserList = null;
+
+/**
+ * Document is loaded.
+ */
 $(document).ready(function()
 {
     // Configurate loading ajax content.
@@ -15,8 +39,20 @@ $(document).ready(function()
         $(this).hide();
     });
 
+    // Init user list.
+    oInstanceUserList = new UserList();
+    oInstanceUserList.setList($(".users_figure")).init();
+
     // Handle form sent to convert its in ajax request.
-    Forms.handleSent("ajax_request", ManipulateResponse);
+    Forms.handleSent("ajax_request", ManipulateResponse, function(oForm)
+    {
+        var sInputUser = $(oForm).find("input[type=search]").val();
+        if (oInstanceUserList.checkIfExists(sInputUser))
+        {
+            showErrorMessage("User found yet!");
+            return false;
+        }
+    });
 });
 
 /**
@@ -28,20 +64,11 @@ ManipulateResponse =
     {
         var oUser = oReponse;
         var oFigure = $(oForm).parent();
-
-        $(oForm).attr("action", "#");
-        $(oFigure).find("figcaption").text(oUser.name);
-        $(oFigure).find("img").attr("src", oUser.picture).attr("alt", oUser.name);
-        $(oFigure).find("em").text("Followers: " + oUser.followers + " / Followings: " + oUser.followings);
-        $(oFigure).find("input[type=search]").attr("disabled", "disabled").blur();
+        oInstanceUserList.activate(oFigure, oUser);
     },
     error: function()
     {
-        $("#message")
-            .text("User not found.")
-            .slideDown("fast")
-            .delay(2000)
-            .fadeOut("slow");
+        showErrorMessage("User not found.");
     },
     timeout: function(){alert("Timeout");}
 };

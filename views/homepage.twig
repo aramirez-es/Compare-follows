@@ -3,24 +3,10 @@
 <h2>Welcome {{ signed_user.screen_name }}</h2>
 <h3>Enter up to 5 users.</h3>
 <section id="list_users">
-    <div id="message" style="display: none"></div>
+    <div id="message" class="ui-state-error" style="display: none"></div>
     {% include 'user.twig' %}
 </section>
 <section id="searcher">
-	<form action="{{ app.request.getBasePath }}/send" method="post" class="ajax_request">
-        <input type="hidden" name="action" id="action" value="compare" />
-		<input type="hidden" name="compare[users][]" value="" id="compare_users_0" required="required" />
-		<p>
-			<label id="type_followers">
-				Followers
-				<input type="radio" name="compare[type][]" value="followers" id="type_followers" checked="checked" />
-			</label>
-			<label for="type_followings">
-				Followings
-				<input type="radio" name="compare[type][]" value="followings" id="type_followings" />
-			</label>
-		</p>
-		<p><input type="submit" value="Compare!"></p>
-	</form>
+    {% include 'compare.twig' %}
 </section>
 {% endblock maincontent %}

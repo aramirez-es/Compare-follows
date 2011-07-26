@@ -1,0 +1,15 @@
+<form action="{{ app.request.getBasePath }}/send" method="post" class="ajax_request">
+    <input type="hidden" name="action" id="action" value="compare" />
+    <input type="hidden" name="compare[users][]" value="" required="required" />
+    <p>
+        <label id="type_followers">
+            Followers
+            <input type="radio" name="compare[type][]" value="followers" id="type_followers" checked="checked" />
+        </label>
+        <label for="type_followings">
+            Followings
+            <input type="radio" name="compare[type][]" value="followings" id="type_followings" />
+        </label>
+    </p>
+    <p><input type="submit" value="Compare!"></p>
+</form>

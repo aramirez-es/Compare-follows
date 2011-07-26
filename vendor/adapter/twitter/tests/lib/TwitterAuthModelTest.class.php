@@ -91,7 +91,7 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         $user_given     = $this->twitter_model_mock->getUserByUsername( $find_user );
         $user_expected  = array(
             'id'            => 123456789,
-            'username'      => 'fake_username',
+            'username'      => '@fake_username',
             'name'          => 'fakename',
             'description'   => 'fake description',
             'picture'       => 'http://image.com',
