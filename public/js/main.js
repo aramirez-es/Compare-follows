@@ -47,6 +47,7 @@ $(document).ready(function()
         .init();
 
     // Handle form sent to convert its in ajax request.
+    Forms.handleSent("compare_ajax", ManipulateCompare);
     Forms.handleSent("ajax_request", ManipulateResponse, function(oForm)
     {
         var sInputUser = $(oForm).find("input[type=search]").val();
@@ -57,6 +58,17 @@ $(document).ready(function()
         }
     });
 });
+
+ManipulateCompare =
+{
+    success: function(oResponse, oForm)
+    {
+        for (var nIndex = 0, nTotal = oResponse.length; nIndex < nTotal; nIndex++)
+        {
+            $("#compare_results").append("<p>" + oResponse[nIndex].name + "</p>");
+        }
+    }
+};
 
 /**
  * Simple object to manipulate response of ajax request.

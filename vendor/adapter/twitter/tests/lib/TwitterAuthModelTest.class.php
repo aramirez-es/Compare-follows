@@ -43,9 +43,11 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         $this->twitter_model_mock->verifyCredentials();
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function testGetUserByUsernameInvalidArgument()
     {
-        $this->setExpectedException( 'InvalidArgumentException' );
         $this->twitter_model_mock->getUserByUsername( null );
     }
 
@@ -102,6 +104,105 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals( $user_expected, $user_given );
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @dataProvider dataProviderForCompareFriendsExpectingException
+     */
+    public function testCompareFriendsExpectingException( $users, $type )
+    {
+        $this->twitter_model_mock->compareFriends( $users, $type );
+    }
+
+    public function dataProviderForCompareFriendsExpectingException()
+    {
+        return array(
+            'Empty users, empty type' => array(
+                array(),
+                null
+            ),
+            'One user, empty type' => array(
+                array( '@fakeuser' ),
+                null
+            ),
+            'Two user, empty type' => array(
+                array( '@fakeuser', '@fakeuser_2' ),
+                null
+            ),
+            'One user, true type' => array(
+                array( '@fakeuser' ),
+                'followers'
+            ),
+            'Two user, fake type' => array(
+                array( '@fakeuser', '@fakeuser_2' ),
+                'faketype'
+            )
+        );
+    }
+
+    public function testCompareFriendsCallIsSuccess()
+    {
+        $users = array( '@fakeuser1', '@fakeuser2', '@fakeuser3' );
+
+        foreach ( $users as $index => $user )
+        {
+            $this->twitter_model_mock->expects( $this->at( $index ) )
+                ->method( 'get' )
+                ->with(
+                    $this->equalTo( 'followers/ids' ),
+                    $this->equalTo( array( 'screen_name' => $user ) )
+                )
+                ->will( $this->returnValue( array() ) );
+        }
+
+        $this->twitter_model_mock->compareFriends( $users, 'followers' );
+    }
+
+    /**
+     * @todo REFACTORING!
+     */
+    public function testCompareFriendsCompareCommonsIds()
+    {
+        $users = array(
+            '@fakeuser1' => array( 1, 2, 3, 4, 5, 6 ),
+            '@fakeuser2' => array( 1, 2, 4, 6, 7 ),
+            '@fakeuser3' => array( 2, 4, 6, 7, 10 )
+        );
+
+        $commons_ids = array( 2, 4, 6 );
+        $last_call_to_get = 0;
+
+        foreach ( array_keys( $users ) as $index => $user )
+        {
+            $last_call_to_get = $index;
+            $this->twitter_model_mock->expects( $this->at( $index ) )
+                ->method( 'get' )
+                ->will( $this->returnValue( $users[$user] ) );
+        }
+
+        $rest_result = new \stdClass();
+        $rest_result->url = 'http://url.com';
+        $rest_result->name = 'fakename';
+        $rest_result->description = 'fake description';
+        $rest_result->profile_image_url = 'http://image.com';
+        $rest_result->followers_count = 200;
+        $rest_result->friends_count = 100;
+        $rest_result->screen_name = 'fake_username';
+        $rest_result->id = 123456789;
+        $rest_result->statuses_count = 550;
+        foreach ( $commons_ids as $user_id )
+        {
+            $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )
+                ->method( 'get' )
+                ->with(
+                    $this->equalTo( 'users/show' ),
+                    $this->equalTo( array( 'user_id' => $user_id ) )
+                )
+                ->will( $this->returnValue( $rest_result ) );
+        }
+
+        $this->twitter_model_mock->compareFriends( array_keys( $users ), 'followers' );
     }
 }
 

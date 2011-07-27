@@ -170,6 +170,8 @@ $app->get( 'receive-response-twitter', function() use ( $app )
  */
 $app->post( '/search-user', function() use ( $app )
 {
+    $app['twitter']->rebuildAuthToken( Twitter\TwitterAuthStep::CONFIRMED_TOKEN );
+
     $search_form    = $app['request']->get( 'search' );
     $response       = $app['twitter']->twitter_adapter->getUserByUsername(
         $app->escape( $search_form['name'] )
@@ -191,13 +193,23 @@ $app->post( '/search-user', function() use ( $app )
  */
 $app->post( '/compare-users', function() use ( $app )
 {
-    $compare_form = $app['request']->get( 'compare' );
-    var_dump($compare_form);
-    die;
+    $app['twitter']->rebuildAuthToken( Twitter\TwitterAuthStep::CONFIRMED_TOKEN );
+
+    $compare_form   = $app['request']->get( 'compare' );
+    $search_type    = $app->escape( $compare_form['type'][0] );
+    $search_users   = array_filter(
+        array_unique( $compare_form['users'] ),
+        array( $app, 'escape' )
+    );
+
+    $response = $app['twitter']->twitter_adapter->compareFriends(
+        $search_users,
+        $search_type
+    );
 
 	return new Response(
         json_encode( $response ),
-        ( null != $response ) ? 200 : 404,
+        200,
         array( 'Content-Type' => 'application/json' )
     );
 });

@@ -1,5 +1,5 @@
 <form action="{{ app.request.getBasePath }}/compare-users" method="post" id="form_compare"
-      class="ajax_request" style="display: none">
+      class="compare_ajax" style="display: none">
     <input type="hidden" name="action" id="action" value="compare" />
     {% for users in 0..4 %}
         <input type="hidden" name="compare[users][]" value="" />
@@ -16,3 +16,4 @@
     </p>
     <p><input type="submit" value="Compare!"></p>
 </form>
+<div id="compare_results"></div>
