@@ -10,6 +10,7 @@ UserList = function()
     this.aVisibleUsers = [];
     this.aActivatedUsers = [];
     this.aInputUsers = [];
+    this.aHiddenValues = [];
 }
 /**
  * Set an array with list of posibles users.
@@ -19,6 +20,16 @@ UserList = function()
 UserList.prototype.setList = function(aList)
 {
     this.aListUsers = aList;
+    return this;
+}
+/**
+ * Set an array with list of hidden input of users ids.
+ *
+ * @param aList Object
+ */
+UserList.prototype.setHiddenContainers = function(aList)
+{
+    this.aHiddenValues = aList;
     return this;
 }
 /**
@@ -43,7 +54,10 @@ UserList.prototype.activate = function(oObjectToActivate, oUserData)
 
     this.aActivatedUsers.push(this.nCurrentSelected);
     this.aInputUsers.push(oUserData.username);
+    $(this.aHiddenValues[this.nCurrentSelected]).val(oUserData.username);
     this._showNext();
+
+    return (this.nCurrentSelected - 1);
 }
 /**
  * Activate de next user to show if is possible.

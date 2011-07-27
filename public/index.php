@@ -162,7 +162,7 @@ $app->get( 'receive-response-twitter', function() use ( $app )
 });
 
 /**
- * Routing "/send" by POST method.
+ * Routing "/search-user" by POST method.
  *
  * Handle form sent and process action submited.
  *
@@ -174,6 +174,26 @@ $app->post( '/search-user', function() use ( $app )
     $response       = $app['twitter']->twitter_adapter->getUserByUsername(
         $app->escape( $search_form['name'] )
     );
+
+	return new Response(
+        json_encode( $response ),
+        ( null != $response ) ? 200 : 404,
+        array( 'Content-Type' => 'application/json' )
+    );
+});
+
+/**
+ * Routing "/compare-users" by POST method.
+ *
+ * Handle form sent and process action submited.
+ *
+ * @return String
+ */
+$app->post( '/compare-users', function() use ( $app )
+{
+    $compare_form = $app['request']->get( 'compare' );
+    var_dump($compare_form);
+    die;
 
 	return new Response(
         json_encode( $response ),

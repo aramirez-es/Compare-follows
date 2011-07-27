@@ -41,7 +41,10 @@ $(document).ready(function()
 
     // Init user list.
     oInstanceUserList = new UserList();
-    oInstanceUserList.setList($(".users_figure")).init();
+    oInstanceUserList
+        .setList($(".users_figure"))
+        .setHiddenContainers($("#form_compare input[type=hidden][name^=compare]"))
+        .init();
 
     // Handle form sent to convert its in ajax request.
     Forms.handleSent("ajax_request", ManipulateResponse, function(oForm)
@@ -64,7 +67,12 @@ ManipulateResponse =
     {
         var oUser = oReponse;
         var oFigure = $(oForm).parent();
-        oInstanceUserList.activate(oFigure, oUser);
+        var nCurrentActivaed = oInstanceUserList.activate(oFigure, oUser);
+
+        if (1 === nCurrentActivaed)
+        {
+            $("#form_compare").fadeIn("fast");
+        }
     },
     error: function()
     {
