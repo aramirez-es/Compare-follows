@@ -10,7 +10,7 @@ Forms =
      *
      * @param string class_name Form class name.
      */
-    handleSent: function(sClassName, oManipulateResponse, fCallbackPreSend)
+    handleSent: function(sClassName, oManipulateResponse)
     {
         var self = this;
 
@@ -19,7 +19,7 @@ Forms =
             {
                 var oForm = eEvent.target;
 
-                if (typeof fCallbackPreSend !== "undefined" && false === fCallbackPreSend(oForm))
+                if (false === self.validateForm(oManipulateResponse, oForm))
                 {
                     return false;
                 }
@@ -47,6 +47,18 @@ Forms =
                 return false;
             })
         });
+    },
+
+    validateForm: function(oManipulateResponse, oForm)
+    {
+        var bIsValid = true;
+
+        if (typeof oManipulateResponse.validate !== "undefined")
+        {
+            bIsValid = oManipulateResponse.validate(oForm);
+        }
+
+        return bIsValid;
     },
 
     /**

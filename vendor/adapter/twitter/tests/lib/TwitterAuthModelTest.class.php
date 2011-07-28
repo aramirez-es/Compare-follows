@@ -191,18 +191,21 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         $rest_result->screen_name = 'fake_username';
         $rest_result->id = 123456789;
         $rest_result->statuses_count = 550;
-        foreach ( $commons_ids as $user_id )
-        {
-            $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )
-                ->method( 'get' )
-                ->with(
-                    $this->equalTo( 'users/show' ),
-                    $this->equalTo( array( 'user_id' => $user_id ) )
-                )
-                ->will( $this->returnValue( $rest_result ) );
-        }
 
-        $this->twitter_model_mock->compareFriends( array_keys( $users ), 'followers' );
+        $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )
+            ->method( 'get' )
+            ->with(
+                $this->equalTo( 'users/lookup' ),
+                $this->equalTo( array( 'user_id' => implode( ',', $commons_ids ) ) )
+            )
+            ->will( $this->returnValue( array( 0 => $rest_result ) ) );
+
+
+        $result = $this->twitter_model_mock->compareFriends( array_keys( $users ), 'followers' );
+
+        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result );
+        $this->assertArrayHasKey( 0, $result );
+        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result[0] );
     }
 }
 

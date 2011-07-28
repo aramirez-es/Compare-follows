@@ -18,6 +18,21 @@ showErrorMessage = function(sMessage)
 }
 
 /**
+ * Configurate view on ajax start and stop
+ */
+configurateAjaxLoading = function()
+{
+    $("#loading").ajaxStart(function()
+    {
+        $(this).show();
+    });
+    $("#loading").ajaxStop(function()
+    {
+        $(this).hide();
+    });
+}
+
+/**
  * Instance of class to manage list of users.
  *
  * @var UserList
@@ -29,17 +44,8 @@ var oInstanceUserList = null;
  */
 $(document).ready(function()
 {
-    // Configurate loading ajax content.
-    $("#loading").ajaxStart(function()
-    {
-        $(this).show();
-    });
-    $("#loading").ajaxStop(function()
-    {
-        $(this).hide();
-    });
+    configurateAjaxLoading();
 
-    // Init user list.
     oInstanceUserList = new UserList();
     oInstanceUserList
         .setList($(".users_figure"))
@@ -48,22 +54,21 @@ $(document).ready(function()
 
     // Handle form sent to convert its in ajax request.
     Forms.handleSent("compare_ajax", ManipulateCompare);
-    Forms.handleSent("ajax_request", ManipulateResponse, function(oForm)
-    {
-        var sInputUser = $(oForm).find("input[type=search]").val();
-        if (oInstanceUserList.checkIfExists(sInputUser))
-        {
-            showErrorMessage("User found yet!");
-            return false;
-        }
-    });
+    Forms.handleSent("ajax_request", ManipulateResponse);
 });
 
+/**
+ * Simple object to manipulate response of ajax request.
+ */
 ManipulateCompare =
 {
     success: function(oResponse, oForm)
     {
-        for (var nIndex = 0, nTotal = oResponse.length; nIndex < nTotal; nIndex++)
+        var nTotal = oResponse.length;
+        $("#compare_results").empty();
+        $("#compare_results").append("<p>" + nTotal + " Amigos en común</p>");
+
+        for (var nIndex = 0; nIndex < nTotal; nIndex++)
         {
             $("#compare_results").append("<p>" + oResponse[nIndex].name + "</p>");
         }
@@ -93,5 +98,18 @@ ManipulateResponse =
     timeout: function()
     {
         showErrorMessage("Network do not respond.");
+    },
+    validate: function(oForm)
+    {
+        var bIsValid    = true;
+        var sInputUser  = $(oForm).find("input[type=search]").val();
+
+        if (oInstanceUserList.checkIfExists(sInputUser))
+        {
+            showErrorMessage("User found yet!");
+            bIsValid = false;
+        }
+
+        return bIsValid;
     }
 };

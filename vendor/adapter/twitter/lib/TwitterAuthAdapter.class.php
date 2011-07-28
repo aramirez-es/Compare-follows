@@ -130,6 +130,8 @@ class TwitterAuthAdapter
     /**
      * Call to original get method of API of Twitter.
      *
+     * @todo cache at this point.
+     *
      * @param string $method Method that Twitter API will call as URL.
      * @param array $parameters Parameters that will be sent to URL.
      *

@@ -80,6 +80,14 @@ class TwitterAuthModel extends TwitterAuthAdapter
         );
     }
 
+    /**
+     * Compare friends (followers/followings) between multiples users given.
+     *
+     * @param array $users
+     * @param string $friend_type
+     *
+     * @return array
+     */
     public function compareFriends( Array $users, $friend_type )
     {
         if ( self::MIN_USERS_TO_COMPARE > count( $users )
@@ -88,29 +96,74 @@ class TwitterAuthModel extends TwitterAuthAdapter
             throw new \InvalidArgumentException( "Required params not found." );
         }
 
+        $method_to_apply = array( $this, 'hydrateRecord' );
+        $commons_friends = $this->getCommonFriends( $users, $friend_type );
+
+        return ( !empty( $commons_friends ) )
+            ? array_map( $method_to_apply, $commons_friends )
+            : array();
+    }
+
+    /**
+     *
+     * @param array $users
+     * @param string $friend_type Friend
+     *
+     * @return array
+     */
+    protected function getCommonFriends( Array $users, $friend_type )
+    {
         $current_index      = 0;
         $num_users          = count( $users );
-        $commons_friend_ids = $this->get(
-            'followers/ids',
-            array( 'screen_name' => $users[$current_index++] )
-        );
+        $commons_friend_ids = $this->getFriendsByUsername( $users[$current_index++], $friend_type );
 
         do
         {
             $commons_friend_ids = array_intersect(
                 $commons_friend_ids,
-                (array) $this->get( 'followers/ids', array( 'screen_name' => $users[$current_index++] ) )
+                $this->getFriendsByUsername( $users[$current_index++], $friend_type )
             );
         }
         while ( $current_index < $num_users );
 
-        $return = array();
-        foreach ( $commons_friend_ids as $friend_id )
+        return $this->getUsersByMultiplesIds( $commons_friend_ids );
+    }
+
+    /**
+     * Given an array with multiples user ids, search this user info.
+     *
+     * @param array $user_ids Array with all users to lookup.
+     *
+     * @return array
+     */
+    protected function getUsersByMultiplesIds( Array $user_ids )
+    {
+        $request = $this->get( 'users/lookup', array( 'user_id' => implode( ',', $user_ids ) ) );
+
+        if ( !is_array( $request ) )
         {
-            $return[] = $this->hydrateRecord($this->get( 'users/show', array( 'user_id' => $friend_id ) ));
+            $request = array();
         }
 
-        return $return;
+        return $request;
+    }
+
+    /**
+     * Get all friends of type given from an username given.
+     *
+     * @param string $username Username to search
+     * @param string $friend_type Type of friends to search
+     *
+     * @return array
+     */
+    protected function getFriendsByUsername( $username, $friend_type )
+    {
+        if ( empty( $username ) || empty( $friend_type ) )
+        {
+            throw new \InvalidArgumentException( 'Required params not found.' );
+        }
+
+        return (array) $this->get( 'followers/ids', array( 'screen_name' => $username ) );
     }
 }
 
