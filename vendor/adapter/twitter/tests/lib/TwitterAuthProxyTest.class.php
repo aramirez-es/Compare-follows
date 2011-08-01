@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../../lib/TwitterAuthProxy.class.php';
-require_once __DIR__ . '/../../lib/TwitterAuthAdapter.class.php';
-require_once __DIR__ . '/../../lib/TwitterAuthStep.class.php';
+require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthProxy.class.php';
+require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthAdapter.class.php';
+require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthStep.class.php';
 
 use Adapter\Twitter;
 

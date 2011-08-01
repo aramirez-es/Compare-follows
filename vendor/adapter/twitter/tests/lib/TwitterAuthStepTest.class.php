@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../../lib/TwitterAuthStep.class.php';
-require_once ( __DIR__ . '/../../../../../silex.phar' );
+require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthStep.class.php';
+require_once realpath( __DIR__ . '/../../../../..' ) . '/silex.phar';
 
 use Adapter\Twitter\TwitterAuthStep;
 
