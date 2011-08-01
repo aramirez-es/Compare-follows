@@ -1,6 +1,8 @@
 <?php
 
-require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthModel.class.php';
+require_once __DIR__ . '/../../lib/TwitterAuthModel.class.php';
+
+ini_set( 'display_errors', true );
 
 use Adapter\Twitter;
 
