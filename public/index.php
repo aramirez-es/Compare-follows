@@ -16,9 +16,6 @@ require_once ( __DIR__ . '/../vendor/adapter/twitter/lib/TwitterAuthProxy.class.
 
 Twig_Autoloader::register();
 
-define( 'ACTION_SEARCH', 'search' );
-define( 'ACTION_COMPARE', 'compare' );
-
 /**
  * Use namespaces.
  */

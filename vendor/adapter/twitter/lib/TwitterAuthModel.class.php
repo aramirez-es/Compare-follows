@@ -16,8 +16,8 @@ class TwitterAuthModel extends TwitterAuthAdapter
      *
      * @var integer
      */
-
     const MIN_USERS_TO_COMPARE = 2;
+
     /**
      * Allowed types of friends to compare.
      *
@@ -96,8 +96,8 @@ class TwitterAuthModel extends TwitterAuthAdapter
             throw new \InvalidArgumentException( "Required params not found." );
         }
 
-        $method_to_apply = array( $this, 'hydrateRecord' );
         $commons_friends = $this->getCommonFriends( $users, $friend_type );
+        $method_to_apply = array( $this, 'hydrateRecord' );
 
         return ( !empty( $commons_friends ) )
             ? array_map( $method_to_apply, $commons_friends )
@@ -158,12 +158,26 @@ class TwitterAuthModel extends TwitterAuthAdapter
      */
     protected function getFriendsByUsername( $username, $friend_type )
     {
-        if ( empty( $username ) || empty( $friend_type ) )
-        {
-            throw new \InvalidArgumentException( 'Required params not found.' );
-        }
+        return (array) $this->get(
+            $this->getUrlByFriendType( $friend_type ),
+            array( 'screen_name' => $username )
+        );
+    }
 
-        return (array) $this->get( 'followers/ids', array( 'screen_name' => $username ) );
+    /**
+     * Given a friend type, returns a url of friends ids.
+     *
+     * @param string $friend_type Type of friends to search.
+     * @return string
+     */
+    protected function getUrlByFriendType( $friend_type )
+    {
+        $friend_urls = array(
+            'followers' => 'followers/ids',
+            'followings' => 'friends/ids'
+        );
+
+        return $friend_urls[$friend_type];
     }
 }
 

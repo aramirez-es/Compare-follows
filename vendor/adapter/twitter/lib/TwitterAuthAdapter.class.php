@@ -2,7 +2,7 @@
 
 namespace Adapter\Twitter;
 
-require_once __DIR__ . '/../twitteroauth/twitteroauth/twitteroauth.php';
+require_once realpath( __DIR__ . '/..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
 
 /**
  * Description of TwitterAuthAdapter.

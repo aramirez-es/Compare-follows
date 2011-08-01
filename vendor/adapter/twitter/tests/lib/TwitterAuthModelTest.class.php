@@ -73,20 +73,9 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
     {
         $find_user = '@fake_username';
 
-        $rest_result = new \stdClass();
-        $rest_result->url = 'http://url.com';
-        $rest_result->name = 'fakename';
-        $rest_result->description = 'fake description';
-        $rest_result->profile_image_url = 'http://image.com';
-        $rest_result->followers_count = 200;
-        $rest_result->friends_count = 100;
-        $rest_result->screen_name = 'fake_username';
-        $rest_result->id = 123456789;
-        $rest_result->statuses_count = 550;
-
         $this->twitter_model_mock->expects( $this->once() )
             ->method( 'get' )
-            ->will( $this->returnValue( $rest_result ) );
+            ->will( $this->returnValue( $this->getFakeRestResult() ) );
 
         $user_given     = $this->twitter_model_mock->getUserByUsername( $find_user );
         $user_expected  = array(
@@ -139,7 +128,13 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testCompareFriendsCallIsSuccess()
+    /**
+     * @dataProvider dataProviderForCompareFriendsCallIsSuccess
+     *
+     * @param string $friend_type Type of friend to search (followings/followers)
+     * @param string $expected_friend_url Expected url of api to call.
+     */
+    public function testCompareFriendsCallIsSuccess( $friend_type, $expected_friend_url )
     {
         $users = array( '@fakeuser1', '@fakeuser2', '@fakeuser3' );
 
@@ -148,18 +143,26 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
             $this->twitter_model_mock->expects( $this->at( $index ) )
                 ->method( 'get' )
                 ->with(
-                    $this->equalTo( 'followers/ids' ),
+                    $this->equalTo( $expected_friend_url ),
                     $this->equalTo( array( 'screen_name' => $user ) )
                 )
                 ->will( $this->returnValue( array() ) );
         }
 
-        $this->twitter_model_mock->compareFriends( $users, 'followers' );
+        $this->twitter_model_mock->compareFriends( $users, $friend_type );
     }
 
     /**
-     * @todo REFACTORING!
+     * @return array
      */
+    public function dataProviderForCompareFriendsCallIsSuccess()
+    {
+        return array(
+            'Call to followers' => array( 'followers', 'followers/ids' ),
+            'Call to followings' => array( 'followings', 'friends/ids' ),
+        );
+    }
+
     public function testCompareFriendsCompareCommonsIds()
     {
         $users = array(
@@ -179,6 +182,24 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
                 ->will( $this->returnValue( $users[$user] ) );
         }
 
+        $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )
+            ->method( 'get' )
+            ->with(
+                $this->equalTo( 'users/lookup' ),
+                $this->equalTo( array( 'user_id' => implode( ',', $commons_ids ) ) )
+            )
+            ->will( $this->returnValue( array( 0 => $this->getFakeRestResult() ) ) );
+
+
+        $result = $this->twitter_model_mock->compareFriends( array_keys( $users ), 'followers' );
+
+        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result );
+        $this->assertArrayHasKey( 0, $result );
+        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result[0] );
+    }
+
+    protected function getFakeRestResult()
+    {
         $rest_result = new \stdClass();
         $rest_result->url = 'http://url.com';
         $rest_result->name = 'fakename';
@@ -190,20 +211,7 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         $rest_result->id = 123456789;
         $rest_result->statuses_count = 550;
 
-        $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )
-            ->method( 'get' )
-            ->with(
-                $this->equalTo( 'users/lookup' ),
-                $this->equalTo( array( 'user_id' => implode( ',', $commons_ids ) ) )
-            )
-            ->will( $this->returnValue( array( 0 => $rest_result ) ) );
-
-
-        $result = $this->twitter_model_mock->compareFriends( array_keys( $users ), 'followers' );
-
-        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result );
-        $this->assertArrayHasKey( 0, $result );
-        $this->assertInternalType( PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $result[0] );
+        return $rest_result;
     }
 }
 
