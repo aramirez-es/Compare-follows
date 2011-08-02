@@ -38,7 +38,7 @@ UserList.prototype.setHiddenContainers = function(aList)
 UserList.prototype.init = function()
 {
     this.nCurrentSelected = 0;
-    this.aVisibleUsers.push(0);
+    this.aVisibleUsers[0] = true;
 }
 /**
  * Add data from server to visible current user.
@@ -48,30 +48,52 @@ UserList.prototype.init = function()
  */
 UserList.prototype.activate = function(oObjectToActivate, oUserData)
 {
+    this.nCurrentSelected = $(this.aListUsers).index(oObjectToActivate);
+
+    this._replaceContentWithUserData(oObjectToActivate, oUserData);
+    this._cleanUserIfExists(this.nCurrentSelected);
+
+    this.aActivatedUsers[this.nCurrentSelected] = true;
+    this.aInputUsers[this.nCurrentSelected] = oUserData.username;
+    $(this.aHiddenValues[this.nCurrentSelected]).val(oUserData.username);
+
+    this._showNext();
+
+    return this.nCurrentSelected;
+}
+/**
+ * Replace the content of user box with user data of response.
+ *
+ * @param oObjectToActivate Object
+ * @param oUserData Object
+ */
+UserList.prototype._replaceContentWithUserData = function(oObjectToActivate, oUserData)
+{
     $(oObjectToActivate).find("figcaption").text(oUserData.name);
     $(oObjectToActivate).find("img").attr("src", oUserData.picture).attr("alt", oUserData.name);
     $(oObjectToActivate).find("em").text("Followers: " + oUserData.followers + " / Followings: " + oUserData.followings);
-
-    this.aActivatedUsers.push(this.nCurrentSelected);
-    this.aInputUsers.push(oUserData.username);
-    $(this.aHiddenValues[this.nCurrentSelected]).val(oUserData.username);
-    this._showNext();
-
-    return (this.nCurrentSelected - 1);
+}
+/**
+ * Clear data of current user if exists.
+ */
+UserList.prototype._cleanUserIfExists = function(nIndex)
+{
+    this.aInputUsers[nIndex] = null;
+    $(this.aHiddenValues[nIndex]).val("");
 }
 /**
  * Activate de next user to show if is possible.
  */
 UserList.prototype._showNext = function()
 {
-    if (this.aListUsers.length === this.aVisibleUsers.length )
+    var nNextUserToShow = this.nCurrentSelected + 1;
+
+    if (true !== this.aVisibleUsers[nNextUserToShow] && nNextUserToShow < this.aListUsers.length)
     {
-        return null;
+        $(this.aListUsers[nNextUserToShow]).fadeIn("fast");
+        this.aVisibleUsers[this.nCurrentSelected] = true;
     }
 
-    this.nCurrentSelected++;
-    $(this.aListUsers[this.nCurrentSelected]).fadeIn("fast");
-    this.aVisibleUsers.push(this.nCurrentSelected);
 }
 /**
  * Check if the given username has been found yet.
@@ -87,7 +109,7 @@ UserList.prototype.checkIfExists = function(sUsername)
     {
         if (this.aInputUsers[nIndex] === sUsername)
         {
-            return true;
+            return nIndex;
         }
         nIndex++;
     }

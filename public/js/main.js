@@ -64,13 +64,28 @@ ManipulateCompare =
 {
     success: function(oResponse, oForm)
     {
-        var nTotal = oResponse.length;
+        var nTotal  = oResponse.length;
+        var oImage  = null;
+        var oLink   = null;
+        var sName   = null;
+        var sPicture = null;
+        var sUser   = null;
+
         $("#compare_results").empty();
         $("#compare_results").append("<p>" + nTotal + " Amigos en común</p>");
 
         for (var nIndex = 0; nIndex < nTotal; nIndex++)
         {
-            $("#compare_results").append("<p>" + oResponse[nIndex].name + "</p>");
+            sName = oResponse[nIndex].name;
+            sPicture = oResponse[nIndex].picture;
+            sUser = oResponse[nIndex].username;
+
+            oImage  = '<img src="' + sPicture + '" alt="' + sName + '" width="48" />';
+            oLink   = '<a href="http://twitter.com/' + sUser
+                        + '" title="' + sName + '" target="_blank">'
+                        + oImage + sName + '</a>';
+
+            $("#compare_results").append("<p>" + oLink + "</p>");
         }
     }
 };
@@ -85,6 +100,7 @@ ManipulateResponse =
         var oUser = oReponse;
         var oFigure = $(oForm).parent();
         var nCurrentActivaed = oInstanceUserList.activate(oFigure, oUser);
+        $("#compare_results").empty();
 
         if (1 === nCurrentActivaed)
         {
@@ -104,7 +120,7 @@ ManipulateResponse =
         var bIsValid    = true;
         var sInputUser  = $(oForm).find("input[type=search]").val();
 
-        if (oInstanceUserList.checkIfExists(sInputUser))
+        if (false !== oInstanceUserList.checkIfExists(sInputUser))
         {
             showErrorMessage("User found yet!");
             bIsValid = false;
