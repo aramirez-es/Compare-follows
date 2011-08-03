@@ -10,9 +10,10 @@ ManipulateResponse =
         var nCurrentActivaed = oInstanceUserList.activate(oFigure, oUser);
         $("#compare_results").empty();
 
-        if (1 === nCurrentActivaed)
+        if (1 <= nCurrentActivaed)
         {
             $("#form_compare").fadeIn("fast");
+            $("#form_compare").submit();
         }
     },
     error: function()
