@@ -104,10 +104,7 @@ UserList.prototype.checkIfExists = function(sUsername)
 {
     var nIndex = 0;
     var nFound = this.aInputUsers.length;
-    if ("@" !== sUsername.charAt(0))
-    {
-        sUsername = "@" + sUsername;
-    }
+    sUsername = this.formatUsername(sUsername);
 
     do
     {
@@ -120,4 +117,18 @@ UserList.prototype.checkIfExists = function(sUsername)
     while(nIndex < nFound);
 
     return false;
+}
+/**
+ * Fomat the user name to unique possible way.
+ *
+ * @param sUsername string
+ */
+UserList.prototype.formatUsername = function(sUsername)
+{
+    if ("@" !== sUsername.charAt(0))
+    {
+        sUsername = "@" + sUsername;
+    }
+
+    return sUsername;
 }
