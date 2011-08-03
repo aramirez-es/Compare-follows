@@ -56,3 +56,32 @@ body {
 #searcher {
     clear: both;
 }
+
+/**
+ * Result of compare
+ */
+#compare_results {
+    padding: 10px 20px;
+    margin: 20px 0;
+}
+.onefriend {
+    float: left;
+    width: 200px;
+    padding: 10px 0;
+}
+
+footer {
+    clear: left;
+}
+
+/* new clearfix */
+.clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+	}
+* html .clearfix             { zoom: 1; } /* IE6 */
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */
