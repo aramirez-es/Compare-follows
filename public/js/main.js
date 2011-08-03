@@ -53,10 +53,12 @@ $(document).ready(function()
         .init();
 
     // Handle form sent to convert its in ajax request.
+    Forms.handleSent("compare_ajax", ManipulateCompare);
+    Forms.handleSent("ajax_request", ManipulateResponse);
+
+    // Attacht event on change friend type.
     $("input[type=radio][name^=compare]").change(function()
     {
         $("#form_compare").submit();
     });
-    Forms.handleSent("compare_ajax", ManipulateCompare);
-    Forms.handleSent("ajax_request", ManipulateResponse);
 });
