@@ -43,9 +43,9 @@ $app->register( new Silex\Extension\TwigExtension(), array(
 // Twitter.
 $app['twitter.customer_key']    = 'dhtbnJJRdbQz3u55u9dig';
 $app['twitter.user_password']   = 'ZbABdtNjXZF10DsJOcjEnnlq4qXoW00BQaZRy2YMY';
-$app['twitter.callback_url']    = 'http://local.dev:8888/receive-response-twitter';
 $app['twitter'] = $app->share( function() use ( $app )
 {
+    $app['twitter.callback_url'] = $app['request']->getUriForPath('/receive-response-twitter');
     $twitter_step       = new Twitter\TwitterAuthStep( $app['session'] );
     $twitter_adapter    = new Twitter\TwitterAuthModel(
         $app['twitter.customer_key'],
