@@ -104,6 +104,10 @@ UserList.prototype.checkIfExists = function(sUsername)
 {
     var nIndex = 0;
     var nFound = this.aInputUsers.length;
+    if ("@" !== sUsername.charAt(0))
+    {
+        sUsername = "@" + sUsername;
+    }
 
     do
     {
