@@ -26,6 +26,11 @@ class CacheNullEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf( '\Cache\CacheSystem' , $this->cache_system );
     }
 
+    public function getTypeShouldBeEqualToConstFactory()
+    {
+        $this->assertEquals( Cache\CacheFactory::TYPE_NULL, $this->cache_system->getType() );
+    }
+
     public function testGetAlwaysReturnFalse()
     {
         $this->assertFalse( $this->cache_system->get( 'somekey' ) );

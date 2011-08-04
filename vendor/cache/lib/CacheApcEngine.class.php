@@ -3,6 +3,7 @@
 namespace Cache;
 
 require_once 'CacheSystem.interface.php' ;
+require_once 'CacheFactory.class.php' ;
 
 /**
  * APC system engine to caching user data.
@@ -37,6 +38,16 @@ class CacheApcEngine implements CacheSystem
         {
             throw new \RuntimeException( 'The APC extension is not loaded!' );
         }
+    }
+
+    /**
+     * Type of object.
+     *
+     * @return string
+     */
+    public static function getType()
+    {
+        return CacheFactory::TYPE_APC;
     }
 
     /**

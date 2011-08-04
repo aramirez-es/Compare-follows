@@ -1,5 +1,7 @@
 <?php
 
+ini_set( 'display_errors', true );
+
 require_once realpath( __DIR__ . '/../lib' ) . '/CacheApcEngine.class.php' ;
 
 use Cache;
@@ -32,6 +34,11 @@ class CacheApcEngineTest extends \PHPUnit_Framework_TestCase
     public function testInstanceOf()
     {
         $this->assertInstanceOf( '\Cache\CacheSystem' , $this->cache_system );
+    }
+
+    public function getTypeShouldBeEqualToConstFactory()
+    {
+        $this->assertEquals( Cache\CacheFactory::TYPE_APC, $this->cache_system->getType() );
     }
 
     /**
