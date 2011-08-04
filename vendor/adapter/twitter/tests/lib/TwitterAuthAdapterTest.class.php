@@ -56,6 +56,33 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testObjectShouldHasNotCacheableActionsAndCacheSystem()
+    {
+        $this->assertObjectHasAttribute( 'not_cacheable_actions', $this->twitter_adapter );
+        $this->assertObjectHasAttribute( 'cache_system', $this->twitter_adapter );
+        $this->assertInstanceOf( 'Cache\CacheNullEngine', $this->twitter_adapter->getCacheSystem() );
+    }
+
+    /**
+     * @dataProvider dataProviderForMakeNullCacheSystem
+     */
+    public function testMakeCacheSystem( $make_method, $expected_system )
+    {
+        $this->twitter_adapter->$make_method();
+        $this->assertInstanceOf( $expected_system, $this->twitter_adapter->getCacheSystem() );
+    }
+
+    /**
+     * @return array
+     */
+    public function dataProviderForMakeNullCacheSystem()
+    {
+        return array(
+            'MakeNullCacheSystem'   => array( 'makeNullCacheSystem', 'Cache\CacheNullEngine' ),
+            'makeApcCacheSystem'    => array( 'makeApcCacheSystem', 'Cache\CacheApcEngine' )
+        );
+    }
+
     /**
      * @dataProvider dataProviderForWrapperSomeMethods
      *

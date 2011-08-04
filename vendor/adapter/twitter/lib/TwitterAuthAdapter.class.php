@@ -1,8 +1,13 @@
 <?php
 
-namespace Adapter\Twitter;
+namespace   Adapter\Twitter;
+use         Cache;
+
+ini_set( 'display_errors', true );
+
 
 require_once realpath( __DIR__ . '/..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
+require_once realpath( __DIR__ . '/../../../cache/lib' ) . '/CacheFactory.class.php';
 
 /**
  * Description of TwitterAuthAdapter.
@@ -40,6 +45,20 @@ class TwitterAuthAdapter
     public $last_user_password = null;
 
     /**
+     * Not cacheable actions.
+     *
+     * @var array
+     */
+    protected $not_cacheable_actions = array();
+
+    /**
+     * System cache to use for save twitter responses on memory.
+     *
+     * @var \Cache\CacheSystem
+     */
+    protected $cache_system = null;
+
+    /**
      * Construct of class, check required params and init the API.
      *
      * @param string $customer_key Customer key to connect with Twitter.
@@ -57,13 +76,50 @@ class TwitterAuthAdapter
 
         $this->last_customer_key    = $customer_key;
         $this->last_user_password   = $user_password;
+        $this->setTwitterApi( $oauth_token, $oauth_token_secret );
+        $this->makeNullCacheSystem();
+    }
 
+    /**
+     * Refactoring of contruct to extract method that instance twitter api oauth.
+     *
+     * @param string $oauth_token Temporal token to connect by means of OAuth with Twitter.
+     * @param string $oauth_token_secret Secret key for OAuth.
+     */
+    protected function setTwitterApi( $oauth_token, $oauth_token_secret )
+    {
         $this->twitter_api = new \TwitterOAuth(
-            $customer_key,
-            $user_password,
+            $this->last_customer_key,
+            $this->last_user_password,
             $oauth_token,
             $oauth_token_secret
         );
+    }
+
+    /**
+     * Returns current object of system cache.
+     *
+     * @return \Cache\CacheSystem
+     */
+    public function getCacheSystem()
+    {
+        return $this->cache_system;
+    }
+
+    /**
+     * Set the current instance of system cache to Null type.
+     */
+    public function makeNullCacheSystem()
+    {
+        $this->cache_system = \Cache\CacheFactory::createInstance();
+    }
+
+    /**
+     * Set the current instance of system cache to Apc type.
+     */
+    public function makeApcCacheSystem()
+    {
+        $this->cache_system = \Cache\CacheFactory::createInstance( \Cache\CacheFactory::TYPE_APC );
     }
 
     /**

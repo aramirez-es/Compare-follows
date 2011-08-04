@@ -1,7 +1,5 @@
 <?php
 
-ini_set( 'display_errors', true );
-
 require_once realpath( __DIR__ . '/../lib' ) . '/CacheApcEngine.class.php' ;
 
 use Cache;
