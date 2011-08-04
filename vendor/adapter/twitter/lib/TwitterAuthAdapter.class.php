@@ -3,9 +3,6 @@
 namespace   Adapter\Twitter;
 use         Cache;
 
-ini_set( 'display_errors', true );
-
-
 require_once realpath( __DIR__ . '/..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
 require_once realpath( __DIR__ . '/../../../cache/lib' ) . '/CacheFactory.class.php';
 
@@ -123,6 +120,16 @@ class TwitterAuthAdapter
     }
 
     /**
+     * Set system of cache from injected parameter.
+     *
+     * @param \Cache\CacheSystem $cache_system Injected system of cache.
+     */
+    public function setCacheSystem( \Cache\CacheSystem $cache_system )
+    {
+        $this->cache_system = $cache_system;
+    }
+
+    /**
      * Returns a temporal token to can access.
      *
      * @param string $callback_url URL used by Twitter as callback.
@@ -197,10 +204,37 @@ class TwitterAuthAdapter
     {
         if ( empty( $method ) || !is_string( $method ) )
         {
-            throw new \RuntimeException( 'Required parameters not found.' );
+            throw new \InvalidArgumentException( 'Required parameters not found.' );
         }
 
-        return $this->twitter_api->get( $method, $parameters );
+        if ( !in_array( $method, $this->not_cacheable_actions ) )
+        {
+            $this->makeApcCacheSystem();
+        }
+
+        return $this->retrieveFromApiOrCache( $method, $parameters );
+    }
+
+    /**
+     * Return the response of api from cache system first or twitter rest api else.
+     *
+     * @param string $method Api url to call.
+     * @param array $parameters Parameters to search as screen_name or id.
+     *
+     * @return mixed
+     */
+    protected function retrieveFromApiOrCache( $method, $parameters )
+    {
+        $key            = base64_encode( $method . '?' . http_build_query( $parameters ) );
+        $api_response   = $this->cache_system->get( $key );
+
+        if ( false === $api_response )
+        {
+            $api_response = $this->twitter_api->get( $method, $parameters );
+            $this->cache_system->set( $key, $api_response );
+        }
+
+        return $api_response;
     }
 
     /**
