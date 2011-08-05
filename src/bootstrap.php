@@ -1,7 +1,5 @@
 <?php
 
-ini_set( 'display_errors', true );
-
 use Adapter\Twitter;
 
 if ( is_file( BASE_DIR . '/twitterdata.php' ) )
