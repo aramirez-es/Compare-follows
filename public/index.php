@@ -1,7 +1,5 @@
 <?php
 
-ini_set('display_errors', true);
-
 /**
  * Main file of project.
  *

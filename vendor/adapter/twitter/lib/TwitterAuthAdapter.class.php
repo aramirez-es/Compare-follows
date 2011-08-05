@@ -68,7 +68,7 @@ class TwitterAuthAdapter
     {
         if ( empty( $customer_key ) || empty( $user_password ) )
         {
-            throw new \RuntimeException( 'Required parameters not founds.' );
+            throw new \InvalidArgumentException( 'Required parameters not founds.' );
         }
 
         $this->last_customer_key    = $customer_key;
@@ -174,7 +174,7 @@ class TwitterAuthAdapter
     {
         if ( empty( $method ) || empty( $parameter ) )
         {
-            throw new \RuntimeException( 'Required parameters not found.' );
+            throw new \InvalidArgumentException( 'Required parameters not found.' );
         }
 
         return $this->twitter_api->$method( $parameter );

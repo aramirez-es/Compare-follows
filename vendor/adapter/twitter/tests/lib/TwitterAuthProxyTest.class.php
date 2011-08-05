@@ -27,9 +27,11 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $this->twitter_proxy = new Twitter\TwitterAuthProxy( $twitter_adapter, $twitter_steps );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testConstructRequireInjection()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_proxy = new Twitter\TwitterAuthProxy( null, null );
     }
 
@@ -101,9 +103,11 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $this->twitter_proxy->getAuthorizeURLFromTokenSaved();
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testSaveUserAsVerifiedEmptyRequest()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_proxy->saveUserAsVerified( null );
     }
 
@@ -160,9 +164,11 @@ class TwitterAuthProxyTest extends \PHPUnit_Framework_TestCase
         $this->twitter_proxy->saveUserAsVerified( $request_mock );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testRequestTokenIsSameAsSavedWithEmptyRequest()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_proxy->requestTokenIsEqualToSaved( null );
     }
 

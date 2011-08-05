@@ -148,17 +148,18 @@ class TwitterAuthStepTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo Refactoring the next four methods.
+     * @expectedException \InvalidArgumentException
      */
     public function testSetWithEmptyParams()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_auth_step->set( null, 'hasthisvalue' );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testGetWithEmptyParams()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_auth_step->get( null );
     }
 
