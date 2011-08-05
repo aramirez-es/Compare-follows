@@ -33,7 +33,7 @@ class TwitterAuthProxy
     {
         if ( empty( $twitter_adapter ) || empty( $twitter_step ) )
         {
-            throw new \RuntimeException( 'Adapter and Storage not found.' );
+            throw new \InvalidArgumentException( 'Adapter and Storage not found.' );
         }
 
         $this->twitter_adapter  = $twitter_adapter;
@@ -74,7 +74,7 @@ class TwitterAuthProxy
     {
         if ( empty( $request ) )
         {
-            throw new \RuntimeException( 'Request parameter not found.' );
+            throw new \InvalidArgumentException( 'Request parameter not found.' );
         }
 
         $access_token = $this->twitter_adapter->getAccessToken(
@@ -101,7 +101,7 @@ class TwitterAuthProxy
     {
         if ( empty( $request ) )
         {
-            throw new \RuntimeException( 'Request parameter not found.' );
+            throw new \InvalidArgumentException( 'Request parameter not found.' );
         }
 
         $request_token = $request->get( 'oauth_token' );

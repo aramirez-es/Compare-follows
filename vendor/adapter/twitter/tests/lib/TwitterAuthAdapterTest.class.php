@@ -1,7 +1,5 @@
 <?php
 
-ini_set( 'display_errors', true );
-
 require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthAdapter.class.php';
 require_once realpath( __DIR__ . '/../..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
 
@@ -52,8 +50,8 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     public function dataProviderForConstruct()
     {
         return array(
-            'Without parameters' => array( '\RuntimeException', null, null ),
-            'With one parameter' => array( '\RuntimeException', 'somevalue', null ),
+            'Without parameters' => array( '\InvalidArgumentException', null, null ),
+            'With one parameter' => array( '\InvalidArgumentException', 'somevalue', null ),
             'With one parameter' => array( false, 'somevalue', 'othervalue' )
         );
     }
@@ -94,7 +92,7 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         if ( empty( $parameter ) )
         {
-            $this->setExpectedException( '\RuntimeException' );
+            $this->setExpectedException( '\InvalidArgumentException' );
         }
         else
         {

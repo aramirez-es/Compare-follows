@@ -92,7 +92,7 @@ class TwitterAuthStep
     {
         if ( empty( $key ) )
         {
-            throw new \RuntimeException( 'Required param not found.' );
+            throw new \InvalidArgumentException( 'Required param not found.' );
         }
 
         return $this->storage->set( ( $this->prefix . $key ), $value );
@@ -110,7 +110,7 @@ class TwitterAuthStep
     {
         if ( empty( $key ) )
         {
-            throw new \RuntimeException( 'Required param not found.' );
+            throw new \InvalidArgumentException( 'Required param not found.' );
         }
 
         if ( $this->storage->has( $this->prefix . $key ) )
