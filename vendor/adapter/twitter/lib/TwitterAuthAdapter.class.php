@@ -46,7 +46,7 @@ class TwitterAuthAdapter
      *
      * @var array
      */
-    protected $not_cacheable_actions = array();
+    protected $not_cacheable_actions = array( 'account/verify_credentials' );
 
     /**
      * System cache to use for save twitter responses on memory.

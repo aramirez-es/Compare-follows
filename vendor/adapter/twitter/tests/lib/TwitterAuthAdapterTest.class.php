@@ -21,7 +21,7 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->twitter_adapter = new TwitterAuthAdapter( 'key', 'secret' );
+        $this->twitter_adapter = new Adapter\Twitter\TwitterAuthAdapter( 'key', 'secret' );
     }
 
     /**
@@ -188,37 +188,33 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
      * @todo solve UT error.
      * @dataProvider dataProviderForGetWhenNotCached
      */
-    public function testGet( $cached, $call_to_api )
+    public function testGet( $cached, $request_method, $call_to_api, $call_to_make_cache )
     {
-        $null_cache = $this->getMock( 'Cache\CacheNullEngine' );
-        $null_cache->expects( $this->once() )
-            ->method( 'get' )
-            ->will( $this->returnValue( $cached ) );
+        $this->configureMockTwitterAdapter();
 
-        $request_method = 'followers/ids';
-        $request_params = array( 'screen_name' => 'somescreenname' );
+        $request_parameters = array( 'screen_name' => 'somescreenname' );
 
-        $twitter_oauth_mock = $this->getMockBuilder( '\TwitterOAuth' )
-            ->disableOriginalConstructor()
-            ->setMethods( array( 'get' ) )
-            ->getMock();
+        $null_cache         = $this->getMock( 'Cache\CacheNullEngine', array( 'get' ) );
+        $null_cache_caller  = $null_cache->expects( $this->once() );
+        $null_cache_caller  ->method( 'get' )->will( $this->returnValue( $cached ) );
 
-        $expected_caller = $twitter_oauth_mock->expects( $call_to_api );
-        $expected_caller->method( 'get' )->will( $this->returnValue( true ) );
+        $twitter_oauth_mock = $this->getTwitterOauthMock();
+        $expected_caller    = $twitter_oauth_mock->expects( $call_to_api );
+        $expected_caller    ->method( 'get' )->will( $this->returnValue( true ) );
+
         if ( !$cached )
         {
             $expected_caller->with(
                 $this->equalTo( $request_method ),
-                $this->equalTo( $request_params )
+                $this->equalTo( $request_parameters )
             );
         }
 
+        $this->twitter_adapter->expects( $call_to_make_cache )->method( 'makeApcCacheSystem' );
         $this->twitter_adapter->setCacheSystem( $null_cache );
         $this->twitter_adapter->setAuthObject( $twitter_oauth_mock );
 
-        $expecte_return = $this->twitter_adapter->get( $request_method, $request_params );
-
-        $this->assertTrue( $expecte_return );
+        $this->assertTrue( $this->twitter_adapter->get( $request_method, $request_parameters ) );
     }
 
     /**
@@ -227,8 +223,43 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     public function dataProviderForGetWhenNotCached()
     {
         return array(
-            'when is not cached should call to api' => array( false, $this->once() ),
-            'when is cached should not call to api' => array( true, $this->never() )
+            'when is not cached should call to api' => array(
+                false,
+                'account/verify_credentials',
+                $this->once(),
+                $this->never()
+            ),
+            'when is cached should not call to api' => array(
+                true,
+                'account/verify_credentials',
+                $this->never(),
+                $this->never()
+            ),
+            'when method is cacheable should be makeApcCacheSystem called' => array(
+                true,
+                'followers/ids',
+                $this->never(),
+                $this->once()
+            )
+        );
+    }
+
+    protected function getTwitterOauthMock()
+    {
+        return $this->getMockBuilder( '\TwitterOAuth' )
+            ->disableOriginalConstructor()
+            ->setMethods( array( 'get' ) )
+            ->getMock();
+    }
+
+    protected function configureMockTwitterAdapter()
+    {
+        $this->twitter_adapter = $this->getMock(
+            'Adapter\Twitter\TwitterAuthAdapter',
+            array( 'makeApcCacheSystem' ),
+            array( 'key', 'pass' ),
+            '',
+            true
         );
     }
 }
