@@ -3,6 +3,7 @@
 namespace Cache;
 
 require_once 'CacheSystem.interface.php' ;
+require_once 'CacheFactory.class.php' ;
 
 /**
  * Null system engine of caching.
@@ -11,6 +12,16 @@ require_once 'CacheSystem.interface.php' ;
  */
 class CacheNullEngine implements CacheSystem
 {
+    /**
+     * Type o object.
+     *
+     * @return string
+     */
+    public static function getType()
+    {
+        return CacheFactory::TYPE_NULL;
+    }
+
     /**
      * Null cache returns false.
      *

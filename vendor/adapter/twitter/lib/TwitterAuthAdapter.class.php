@@ -1,8 +1,10 @@
 <?php
 
-namespace Adapter\Twitter;
+namespace   Adapter\Twitter;
+use         Cache;
 
 require_once realpath( __DIR__ . '/..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
+require_once realpath( __DIR__ . '/../../../cache/lib' ) . '/CacheFactory.class.php';
 
 /**
  * Description of TwitterAuthAdapter.
@@ -40,6 +42,20 @@ class TwitterAuthAdapter
     public $last_user_password = null;
 
     /**
+     * Not cacheable actions.
+     *
+     * @var array
+     */
+    protected $not_cacheable_actions = array( 'account/verify_credentials' );
+
+    /**
+     * System cache to use for save twitter responses on memory.
+     *
+     * @var \Cache\CacheSystem
+     */
+    protected $cache_system = null;
+
+    /**
      * Construct of class, check required params and init the API.
      *
      * @param string $customer_key Customer key to connect with Twitter.
@@ -57,13 +73,60 @@ class TwitterAuthAdapter
 
         $this->last_customer_key    = $customer_key;
         $this->last_user_password   = $user_password;
+        $this->setTwitterApi( $oauth_token, $oauth_token_secret );
+        $this->makeNullCacheSystem();
+    }
 
+    /**
+     * Refactoring of contruct to extract method that instance twitter api oauth.
+     *
+     * @param string $oauth_token Temporal token to connect by means of OAuth with Twitter.
+     * @param string $oauth_token_secret Secret key for OAuth.
+     */
+    protected function setTwitterApi( $oauth_token, $oauth_token_secret )
+    {
         $this->twitter_api = new \TwitterOAuth(
-            $customer_key,
-            $user_password,
+            $this->last_customer_key,
+            $this->last_user_password,
             $oauth_token,
             $oauth_token_secret
         );
+    }
+
+    /**
+     * Returns current object of system cache.
+     *
+     * @return \Cache\CacheSystem
+     */
+    public function getCacheSystem()
+    {
+        return $this->cache_system;
+    }
+
+    /**
+     * Set the current instance of system cache to Null type.
+     */
+    public function makeNullCacheSystem()
+    {
+        $this->cache_system = \Cache\CacheFactory::createInstance();
+    }
+
+    /**
+     * Set the current instance of system cache to Apc type.
+     */
+    public function makeApcCacheSystem()
+    {
+        $this->cache_system = \Cache\CacheFactory::createInstance( \Cache\CacheFactory::TYPE_APC );
+    }
+
+    /**
+     * Set system of cache from injected parameter.
+     *
+     * @param \Cache\CacheSystem $cache_system Injected system of cache.
+     */
+    public function setCacheSystem( \Cache\CacheSystem $cache_system )
+    {
+        $this->cache_system = $cache_system;
     }
 
     /**
@@ -141,10 +204,37 @@ class TwitterAuthAdapter
     {
         if ( empty( $method ) || !is_string( $method ) )
         {
-            throw new \RuntimeException( 'Required parameters not found.' );
+            throw new \InvalidArgumentException( 'Required parameters not found.' );
         }
 
-        return $this->twitter_api->get( $method, $parameters );
+        if ( !in_array( $method, $this->not_cacheable_actions ) )
+        {
+            $this->makeApcCacheSystem();
+        }
+
+        return $this->retrieveFromApiOrCache( $method, $parameters );
+    }
+
+    /**
+     * Return the response of api from cache system first or twitter rest api else.
+     *
+     * @param string $method Api url to call.
+     * @param array $parameters Parameters to search as screen_name or id.
+     *
+     * @return mixed
+     */
+    protected function retrieveFromApiOrCache( $method, $parameters )
+    {
+        $key            = base64_encode( $method . '?' . http_build_query( $parameters ) );
+        $api_response   = $this->cache_system->get( $key );
+
+        if ( false === $api_response )
+        {
+            $api_response = $this->twitter_api->get( $method, $parameters );
+            $this->cache_system->set( $key, $api_response );
+        }
+
+        return $api_response;
     }
 
     /**

@@ -28,6 +28,11 @@ interface CacheSystem
      * Delete an element of cache system.
      */
     public function delete( $key );
+
+    /**
+     * Returns the type of engine.
+     */
+    public static function getType();
 }
 
 ?>

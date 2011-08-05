@@ -1,5 +1,7 @@
 <?php
 
+ini_set( 'display_errors', true );
+
 require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthAdapter.class.php';
 require_once realpath( __DIR__ . '/../..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
 
@@ -19,7 +21,7 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->twitter_adapter = new TwitterAuthAdapter( 'key', 'secret' );
+        $this->twitter_adapter = new Adapter\Twitter\TwitterAuthAdapter( 'key', 'secret' );
     }
 
     /**
@@ -53,6 +55,33 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
             'Without parameters' => array( '\RuntimeException', null, null ),
             'With one parameter' => array( '\RuntimeException', 'somevalue', null ),
             'With one parameter' => array( false, 'somevalue', 'othervalue' )
+        );
+    }
+
+    public function testObjectShouldHasNotCacheableActionsAndCacheSystem()
+    {
+        $this->assertObjectHasAttribute( 'not_cacheable_actions', $this->twitter_adapter );
+        $this->assertObjectHasAttribute( 'cache_system', $this->twitter_adapter );
+        $this->assertInstanceOf( 'Cache\CacheNullEngine', $this->twitter_adapter->getCacheSystem() );
+    }
+
+    /**
+     * @dataProvider dataProviderForMakeNullCacheSystem
+     */
+    public function testMakeCacheSystem( $make_method, $expected_system )
+    {
+        $this->twitter_adapter->$make_method();
+        $this->assertInstanceOf( $expected_system, $this->twitter_adapter->getCacheSystem() );
+    }
+
+    /**
+     * @return array
+     */
+    public function dataProviderForMakeNullCacheSystem()
+    {
+        return array(
+            'MakeNullCacheSystem'   => array( 'makeNullCacheSystem', 'Cache\CacheNullEngine' ),
+            'makeApcCacheSystem'    => array( 'makeApcCacheSystem', 'Cache\CacheApcEngine' )
         );
     }
 
@@ -148,61 +177,91 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo Refactoring three next methods.
+     * @expectedException \InvalidArgumentException
      */
     public function testGetWithEmptyParameters()
     {
-        $this->setExpectedException( '\RuntimeException' );
         $this->twitter_adapter->get( null );
     }
 
-    public function testGet()
+    /**
+     * @todo solve UT error.
+     * @dataProvider dataProviderForGetWhenNotCached
+     */
+    public function testGet( $cached, $request_method, $call_to_api, $call_to_make_cache )
     {
-        $request_method = 'followers/ids';
+        $this->configureMockTwitterAdapter();
 
-        $twitter_oauth_mock = $this->getMock(
-            '\TwitterOAuth',
-            array( 'get' ),
-            array(),
-            '',
-            false
-        );
-        $twitter_oauth_mock->expects( $this->once() )
-            ->method( 'get' )
-            ->with( $this->equalTo( $request_method ) )
-            ->will( $this->returnValue( true ) );
+        $request_parameters = array( 'screen_name' => 'somescreenname' );
 
-        $this->twitter_adapter->setAuthObject( $twitter_oauth_mock );
-        $expecte_return = $this->twitter_adapter->get( $request_method );
-        $this->assertTrue( $expecte_return );
-    }
+        $null_cache         = $this->getMock( 'Cache\CacheNullEngine', array( 'get' ) );
+        $null_cache_caller  = $null_cache->expects( $this->once() );
+        $null_cache_caller  ->method( 'get' )->will( $this->returnValue( $cached ) );
 
-    public function testGetWithArguments()
-    {
-        $request_method = 'followers/ids';
-        $request_params = array( 'screen_name' => 'somescreenname' );
+        $twitter_oauth_mock = $this->getTwitterOauthMock();
+        $expected_caller    = $twitter_oauth_mock->expects( $call_to_api );
+        $expected_caller    ->method( 'get' )->will( $this->returnValue( true ) );
 
-        $twitter_oauth_mock = $this->getMock(
-            '\TwitterOAuth',
-            array( 'get' ),
-            array(),
-            '',
-            false
-        );
-        $twitter_oauth_mock->expects( $this->once() )
-            ->method( 'get' )
-            ->with
-            (
+        if ( !$cached )
+        {
+            $expected_caller->with(
                 $this->equalTo( $request_method ),
-                $this->equalTo( $request_params )
-            )
-            ->will( $this->returnValue( true ) );
+                $this->equalTo( $request_parameters )
+            );
+        }
 
+        $this->twitter_adapter->expects( $call_to_make_cache )->method( 'makeApcCacheSystem' );
+        $this->twitter_adapter->setCacheSystem( $null_cache );
         $this->twitter_adapter->setAuthObject( $twitter_oauth_mock );
-        $expecte_return = $this->twitter_adapter->get( $request_method, $request_params );
-        $this->assertTrue( $expecte_return );
+
+        $this->assertTrue( $this->twitter_adapter->get( $request_method, $request_parameters ) );
     }
 
+    /**
+     * @return array
+     */
+    public function dataProviderForGetWhenNotCached()
+    {
+        return array(
+            'when is not cached should call to api' => array(
+                false,
+                'account/verify_credentials',
+                $this->once(),
+                $this->never()
+            ),
+            'when is cached should not call to api' => array(
+                true,
+                'account/verify_credentials',
+                $this->never(),
+                $this->never()
+            ),
+            'when method is cacheable should be makeApcCacheSystem called' => array(
+                true,
+                'followers/ids',
+                $this->never(),
+                $this->once()
+            )
+        );
+    }
+
+    protected function getTwitterOauthMock()
+    {
+        return $this->getMockBuilder( '\TwitterOAuth' )
+            ->disableOriginalConstructor()
+            ->setMethods( array( 'get' ) )
+            ->getMock();
+    }
+
+    protected function configureMockTwitterAdapter()
+    {
+        $this->twitter_adapter = $this->getMock(
+            'Adapter\Twitter\TwitterAuthAdapter',
+            array( 'makeApcCacheSystem' ),
+            array( 'key', 'pass' ),
+            '',
+            true
+        );
+    }
 }
 
 ?>
