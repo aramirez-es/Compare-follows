@@ -69,7 +69,7 @@ class TwitterAuthModel extends TwitterAuthAdapter
     {
         return array(
             'id'            => $rest_response->id,
-            'username'      => '@' . $rest_response->screen_name,
+            'username'      => $rest_response->screen_name,
             'name'          => $rest_response->name,
             'description'   => $rest_response->description,
             'picture'       => $rest_response->profile_image_url,

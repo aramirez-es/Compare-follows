@@ -11,6 +11,7 @@ ManipulateCompare =
         var nTotal      = oResponse.length;
         var oImage      = null;
         var oLink       = null;
+        var oCompare    = null;
         var oContainer  = null;
 
         $("#compare_results").empty();
@@ -24,10 +25,13 @@ ManipulateCompare =
 
             oImage      = this.createImage();
             oLink       = this.createLink(oImage);
-            oContainer  = this.createContainer(oLink);
+            oCompare    = this.createCompareButton();
+            oContainer  = this.createContainer(oLink, oCompare);
 
             $("#compare_results").append(oContainer);
         }
+
+        this.attachEvent();
     },
     createImage : function()
     {
@@ -51,13 +55,36 @@ ManipulateCompare =
 
         return oLink;
     },
-    createContainer: function(oLink)
+    createCompareButton: function()
+    {
+        oCompare = document.createElement("a");
+
+        $(oCompare).attr("href", "#");
+        $(oCompare).addClass("comparethis");
+        $(oCompare).append("Compare it");
+
+        return oCompare;
+    },
+    createContainer: function(oLink, oCompare)
     {
         oContainer = document.createElement("div");
 
+        $(oContainer).attr("value", this.sUser);
         $(oContainer).addClass("onefriend");
         $(oContainer).append(oLink);
+        $(oContainer).append(oCompare);
 
         return oContainer;
+    },
+    attachEvent: function()
+    {
+        $("a.comparethis").click(function(eEvent)
+        {
+            var oTarget = eEvent.target;
+            alert("Compare " + $(oTarget).parent().attr("value"));
+//            ManipulateResponse.success({}, {});
+
+            return false;
+        });
     }
 };

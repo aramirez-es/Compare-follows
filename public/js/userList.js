@@ -125,9 +125,9 @@ UserList.prototype.checkIfExists = function(sUsername)
  */
 UserList.prototype.formatUsername = function(sUsername)
 {
-    if ("@" !== sUsername.charAt(0))
+    if ("@" === sUsername.charAt(0))
     {
-        sUsername = "@" + sUsername;
+        sUsername = sUsername.substring(1);
     }
 
     return sUsername;

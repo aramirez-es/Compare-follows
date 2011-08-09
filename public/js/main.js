@@ -33,6 +33,18 @@ configurateAjaxLoading = function()
 }
 
 /**
+ * Attach events to Dom
+ */
+function attachEventsToDom()
+{
+    // Attacht event on change friend type.
+    $("input[type=radio][name^=compare]").change(function()
+    {
+        $("#form_compare").submit();
+    });
+}
+
+/**
  * Instance of class to manage list of users.
  *
  * @var UserList
@@ -56,9 +68,5 @@ $(document).ready(function()
     Forms.handleSent("compare_ajax", ManipulateCompare);
     Forms.handleSent("ajax_request", ManipulateResponse);
 
-    // Attacht event on change friend type.
-    $("input[type=radio][name^=compare]").change(function()
-    {
-        $("#form_compare").submit();
-    });
+    attachEventsToDom();
 });
