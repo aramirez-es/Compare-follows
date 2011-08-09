@@ -56,6 +56,13 @@ class TwitterAuthAdapter
     protected $cache_system = null;
 
     /**
+     * Flag to easy activate/desactivate cache system.
+     *
+     * @var boolean
+     */
+    protected $use_cache = true;
+
+    /**
      * Construct of class, check required params and init the API.
      *
      * @param string $customer_key Customer key to connect with Twitter.
@@ -101,6 +108,26 @@ class TwitterAuthAdapter
     public function getCacheSystem()
     {
         return $this->cache_system;
+    }
+
+    /**
+     * Returns flag with current status of use cache.
+     *
+     * @return boolean
+     */
+    public function getUseCache()
+    {
+        return (boolean) $this->use_cache;
+    }
+
+    /**
+     * Set flag with new status of use cache.
+     *
+     * @return boolean
+     */
+    public function setUseCache( $use_cache )
+    {
+        return $this->use_cache = (boolean) $use_cache;
     }
 
     /**
@@ -226,7 +253,7 @@ class TwitterAuthAdapter
     protected function retrieveFromApiOrCache( $method, $parameters )
     {
         $key            = base64_encode( $method . '?' . http_build_query( $parameters ) );
-        $api_response   = $this->cache_system->get( $key );
+        $api_response   = ( $this->getUseCache() ) ? $this->cache_system->get( $key ) : false;
 
         if ( false === $api_response )
         {

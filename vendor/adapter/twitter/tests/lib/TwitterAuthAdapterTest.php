@@ -1,5 +1,7 @@
 <?php
 
+ini_set( 'display_errors', true );
+
 require_once realpath( __DIR__ . '/../../lib' ) . '/TwitterAuthAdapter.class.php';
 require_once realpath( __DIR__ . '/../..' ) . '/twitteroauth/twitteroauth/twitteroauth.php';
 
@@ -60,6 +62,8 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertObjectHasAttribute( 'not_cacheable_actions', $this->twitter_adapter );
         $this->assertObjectHasAttribute( 'cache_system', $this->twitter_adapter );
+        $this->assertObjectHasAttribute( 'use_cache', $this->twitter_adapter );
+        $this->assertTrue( $this->twitter_adapter->getUseCache() );
         $this->assertInstanceOf( 'Cache\CacheNullEngine', $this->twitter_adapter->getCacheSystem() );
     }
 
@@ -186,21 +190,21 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
      * @todo solve UT error.
      * @dataProvider dataProviderForGetWhenNotCached
      */
-    public function testGet( $cached, $request_method, $call_to_api, $call_to_make_cache )
+    public function testGet( $use_cache, $cached, $request_method, $call_to_api, $call_to_make_cache )
     {
         $this->configureMockTwitterAdapter();
 
         $request_parameters = array( 'screen_name' => 'somescreenname' );
 
         $null_cache         = $this->getMock( 'Cache\CacheNullEngine', array( 'get' ) );
-        $null_cache_caller  = $null_cache->expects( $this->once() );
+        $null_cache_caller  = $null_cache->expects( ( $use_cache ) ? $this->once() : $this->never() );
         $null_cache_caller  ->method( 'get' )->will( $this->returnValue( $cached ) );
 
         $twitter_oauth_mock = $this->getTwitterOauthMock();
         $expected_caller    = $twitter_oauth_mock->expects( $call_to_api );
         $expected_caller    ->method( 'get' )->will( $this->returnValue( true ) );
 
-        if ( !$cached )
+        if ( !$use_cache || ( $use_cache && !$cached ) )
         {
             $expected_caller->with(
                 $this->equalTo( $request_method ),
@@ -208,6 +212,7 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
             );
         }
 
+        $this->twitter_adapter->setUseCache( $use_cache );
         $this->twitter_adapter->expects( $call_to_make_cache )->method( 'makeApcCacheSystem' );
         $this->twitter_adapter->setCacheSystem( $null_cache );
         $this->twitter_adapter->setAuthObject( $twitter_oauth_mock );
@@ -222,18 +227,35 @@ class TwitterAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             'when is not cached should call to api' => array(
+                true,
                 false,
                 'account/verify_credentials',
                 $this->once(),
                 $this->never()
             ),
-            'when is cached should not call to api' => array(
+            'when use cache flag is off always call to api' => array(
+                false,
+                true,
+                'account/verify_credentials',
+                $this->once(),
+                $this->never()
+            ),
+            'when use cache flag is off always call to api 2' => array(
+                false,
+                false,
+                'account/verify_credentials',
+                $this->once(),
+                $this->never()
+            ),
+            'when use cache flag is on and data is cached should not call to api' => array(
+                true,
                 true,
                 'account/verify_credentials',
                 $this->never(),
                 $this->never()
             ),
             'when method is cacheable should be makeApcCacheSystem called' => array(
+                true,
                 true,
                 'followers/ids',
                 $this->never(),
