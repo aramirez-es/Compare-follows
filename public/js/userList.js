@@ -72,6 +72,7 @@ UserList.prototype._replaceContentWithUserData = function(oObjectToActivate, oUs
     $(oObjectToActivate).find("figcaption").text(oUserData.name);
     $(oObjectToActivate).find("img").attr("src", oUserData.picture).attr("alt", oUserData.name);
     $(oObjectToActivate).find("em").text("Followers: " + oUserData.followers + " / Followings: " + oUserData.followings);
+    $(oObjectToActivate).find("input[type=search]").val(oUserData.username);
 }
 /**
  * Clear data of current user if exists.
@@ -86,11 +87,9 @@ UserList.prototype._cleanUserIfExists = function(nIndex)
  */
 UserList.prototype._showNext = function()
 {
-    var nNextUserToShow = this.nCurrentSelected + 1;
-
-    if (true !== this.aVisibleUsers[nNextUserToShow] && nNextUserToShow < this.aListUsers.length)
+    if (this.canAddMoreUsers())
     {
-        $(this.aListUsers[nNextUserToShow]).fadeIn("fast");
+        $(this.aListUsers[this.nCurrentSelected + 1]).fadeIn("fast");
         this.aVisibleUsers[this.nCurrentSelected] = true;
     }
 
@@ -131,4 +130,15 @@ UserList.prototype.formatUsername = function(sUsername)
     }
 
     return sUsername;
+}
+/**
+ * Check if is possible add more content to compare.
+ *
+ * @return boolean
+ */
+UserList.prototype.canAddMoreUsers = function()
+{
+    var nNextUserToShow = this.nCurrentSelected + 1;
+
+    return (true !== this.aVisibleUsers[nNextUserToShow] && nNextUserToShow < this.aListUsers.length);
 }

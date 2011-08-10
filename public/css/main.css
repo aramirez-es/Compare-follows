@@ -67,7 +67,11 @@ body {
 .onefriend {
     float: left;
     width: 200px;
+    height: 75px;
     padding: 10px 0;
+}
+.onefriend a {
+    display: block;
 }
 
 footer {

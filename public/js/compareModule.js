@@ -25,13 +25,13 @@ ManipulateCompare =
 
             oImage      = this.createImage();
             oLink       = this.createLink(oImage);
-            oCompare    = this.createCompareButton();
+            oCompare    = this.createCompareButton(nIndex);
             oContainer  = this.createContainer(oLink, oCompare);
 
             $("#compare_results").append(oContainer);
         }
 
-        this.attachEvent();
+        this.attachEvent(oResponse);
     },
     createImage : function()
     {
@@ -55,12 +55,18 @@ ManipulateCompare =
 
         return oLink;
     },
-    createCompareButton: function()
+    createCompareButton: function(nIndex)
     {
+        if (!oInstanceUserList.canAddMoreUsers())
+        {
+            return null;
+        }
+
         oCompare = document.createElement("a");
 
         $(oCompare).attr("href", "#");
         $(oCompare).addClass("comparethis");
+        $(oCompare).attr("value", nIndex);
         $(oCompare).append("Compare it");
 
         return oCompare;
@@ -76,13 +82,16 @@ ManipulateCompare =
 
         return oContainer;
     },
-    attachEvent: function()
+    attachEvent: function(oResponse)
     {
         $("a.comparethis").click(function(eEvent)
         {
             var oTarget = eEvent.target;
-            alert("Compare " + $(oTarget).parent().attr("value"));
-//            ManipulateResponse.success({}, {});
+
+            ManipulateResponse.success(
+                oResponse[$(oTarget).val()],
+                $(".users_figure:visible:last > form")
+            );
 
             return false;
         });
