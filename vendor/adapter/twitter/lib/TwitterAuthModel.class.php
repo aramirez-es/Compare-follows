@@ -138,7 +138,8 @@ class TwitterAuthModel extends TwitterAuthAdapter
      */
     protected function getUsersByMultiplesIds( Array $user_ids )
     {
-        $request = $this->get( 'users/lookup', array( 'user_id' => implode( ',', $user_ids ) ) );
+        $user_ids   = $this->sortCommonUsersArray( $user_ids );
+        $request    = $this->get( 'users/lookup', array( 'user_id' => implode( ',', $user_ids ) ) );
 
         if ( !is_array( $request ) )
         {
@@ -146,6 +147,18 @@ class TwitterAuthModel extends TwitterAuthAdapter
         }
 
         return $request;
+    }
+
+    /**
+     * Order user commons ids array.
+     *
+     * @param array $user_ids User common ids.
+     * @return array
+     */
+    protected function sortCommonUsersArray( Array $user_ids )
+    {
+        sort( $user_ids, SORT_STRING );
+        return $user_ids;
     }
 
     /**

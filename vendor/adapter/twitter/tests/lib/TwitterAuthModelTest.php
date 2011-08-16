@@ -80,7 +80,7 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
         $user_given     = $this->twitter_model_mock->getUserByUsername( $find_user );
         $user_expected  = array(
             'id'            => 123456789,
-            'username'      => '@fake_username',
+            'username'      => 'fake_username',
             'name'          => 'fakename',
             'description'   => 'fake description',
             'picture'       => 'http://image.com',
@@ -166,9 +166,9 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
     public function testCompareFriendsCompareCommonsIds()
     {
         $users = array(
-            '@fakeuser1' => array( 1, 2, 3, 4, 5, 6 ),
+            '@fakeuser1' => array( 6, 1, 3, 4, 5, 2 ),
             '@fakeuser2' => array( 1, 2, 4, 6, 7 ),
-            '@fakeuser3' => array( 2, 4, 6, 7, 10 )
+            '@fakeuser3' => array( 2, 6, 4, 7, 10 )
         );
 
         $commons_ids = array( 2, 4, 6 );
