@@ -45,13 +45,18 @@ body {
 	background-color: #CCC;
 	border: 2px solid #898989;
 	border-radius: 15px;
-	width: 140px;
+	width: 160px;
 	text-align: center;
 	padding: 10px 0;
     float: left;
 }
 .users_figure em {
 	font-size: 0.65em;
+}
+.users_figure input {
+    width: 85%;
+	border: 1px solid #898989;
+    padding: 2px;
 }
 #searcher {
     clear: both;
@@ -62,16 +67,21 @@ body {
  */
 #compare_results {
     padding: 10px 20px;
-    margin: 20px 0;
 }
 .onefriend {
     float: left;
     width: 200px;
     height: 75px;
-    padding: 10px 0;
+    padding-bottom: 40px;
+}
+.onefriend img {
+    display: block;
+    border: 0;
 }
 .onefriend a {
     display: block;
+    color: #455432;
+    text-decoration: none;
 }
 
 footer {

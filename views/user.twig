@@ -3,10 +3,8 @@
 		{% set picture = '/images/default-user.png' %}
 		<img src="{{ user.picture|default( app.request.getBasePath ~ picture ) }}"
 			width="48" heigth="48" alt="{{ user.name|default('user name') }}" />
-		<p>
 			<figcaption>{{ user.name|default('user name') }}</figcaption>
 			<em>Followers: {{ user.followers|default(0) }} / Followings: {{ user.followings|default(0) }}</em>
-		</p>
 		<form action="{{ app.request.getBasePath }}/search-user" method="post" class="ajax_request">
             <input type="hidden" name="action" value="search" />
             <input type="hidden" name="search[box]" value="{{ loop.index }}" />

@@ -67,7 +67,7 @@ ManipulateCompare =
         $(oCompare).attr("href", "#");
         $(oCompare).addClass("comparethis");
         $(oCompare).attr("value", nIndex);
-        $(oCompare).append("Compare it");
+        $(oCompare).append("Compare!");
 
         return oCompare;
     },
