@@ -34,26 +34,15 @@
 					<em>This project uses HTML5 and CSS3 so you need a modern browser to show it correctly.</em>
 				</p>
 				<p>
-					<em>
-						Project developed by
-						<a href="http://www.aramirez.es" rel="external">aramirez.es</a>
-						and hosted at
+					<em>Project developed by
+						<a href="http://www.aramirez.es" rel="external">aramirez.es</a>.
+						Public repository in
 						<a href="http://www.github.com/aramirez-es/Compare-follows" rel="external">Github</a>
 					</em>
 				</p>
 				{% endblock footer %}
 			</footer>
 		</div>
-        <script type="text/javascript">
-          var _gaq = _gaq || [];
-          _gaq.push(['_setAccount', 'UA-4885186-3']);
-          _gaq.push(['_trackPageview']);
-
-          (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-        </script>
+        {% include 'ga.twig' %}
 	</body>
 </html>

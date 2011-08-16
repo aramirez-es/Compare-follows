@@ -89,7 +89,11 @@ UserList.prototype._showNext = function()
 {
     if (this.canAddMoreUsers())
     {
-        $(this.aListUsers[this.nCurrentSelected + 1]).fadeIn("fast");
+        var nSelected = this.nCurrentSelected + 1;
+
+        $(this.aListUsers[nSelected]).fadeIn("fast");
+        $(this.aListUsers[nSelected]).find("input[type=search]").focus();
+
         this.aVisibleUsers[this.nCurrentSelected] = true;
     }
 
