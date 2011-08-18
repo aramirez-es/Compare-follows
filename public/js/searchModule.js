@@ -9,6 +9,7 @@ ManipulateResponse =
         var oFigure = $(oForm).parent();
         var nCurrentActivaed = oInstanceUserList.activate(oFigure, oUser);
         $("#compare_results").empty();
+        _gaq.push(['_trackEvent', 'home', 'search - success', oUser.username]);
 
         if (1 <= nCurrentActivaed)
         {
@@ -16,9 +17,12 @@ ManipulateResponse =
             $("#form_compare").submit();
         }
     },
-    error: function()
+    error: function(oForm)
     {
+        var sInputUser  = $(oForm).find("input[type=search]").val();
+
         showErrorMessage("User not found.");
+        _gaq.push(['_trackEvent', 'home', 'search - failure', sInputUser]);
     },
     timeout: function()
     {

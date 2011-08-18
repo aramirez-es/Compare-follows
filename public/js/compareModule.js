@@ -16,6 +16,7 @@ ManipulateCompare =
 
         $("#compare_results").empty();
         $("#compare_results").append("<p>" + nTotal + " Amigos en común</p>");
+        _gaq.push(['_trackEvent', 'home', 'compare']);
 
         for (var nIndex = 0; nIndex < nTotal; nIndex++)
         {
@@ -87,6 +88,7 @@ ManipulateCompare =
         $("a.comparethis").click(function(eEvent)
         {
             var oTarget = eEvent.target;
+            _gaq.push(['_trackEvent', 'home', 'search - compare']);
 
             ManipulateResponse.success(
                 oResponse[$(oTarget).val()],
