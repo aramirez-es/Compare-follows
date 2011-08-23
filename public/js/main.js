@@ -71,9 +71,6 @@ $(document).ready(function()
         .setHiddenContainers($("#form_compare input[type=hidden][name^=compare]"))
         .init();
 
-    _gaq.push(['_setAccount', 'UA-4885186-3']);
-    _gaq.push(['_trackPageview']);
-
     // Handle form sent to convert its in ajax request.
     Forms.handleSent("compare_ajax", ManipulateCompare);
     Forms.handleSent("ajax_request", ManipulateResponse);
