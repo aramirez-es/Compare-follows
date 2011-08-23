@@ -14,10 +14,7 @@
 		<script type="text/javascript" src="{{ app.request.getBasePath }}/js/userList.js" charset="utf-8"></script>
 		<script type="text/javascript" src="{{ app.request.getBasePath }}/js/forms.js" charset="utf-8"></script>
 		<script type="text/javascript" src="{{ app.request.getBasePath }}/js/main.js" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">
-            _gaq.push(['_setAccount', 'UA-4885186-3']);
-            _gaq.push(['_trackPageview']);
-        </script>
+        {% include 'ga.twig' %}
 	</head>
 	<body>
         <div id="loading" style="display: none;"><p>Waiting...</p><p></p></div>
@@ -47,6 +44,5 @@
 				{% endblock footer %}
 			</footer>
 		</div>
-        {% include 'ga.twig' %}
 	</body>
 </html>
