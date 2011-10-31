@@ -1,0 +1,6 @@
+<?php
+
+define( 'TWITTER_CUSTOMER_KEY', '' );
+define( 'TWITTER_PASSWORD', '' );
+
+?>
