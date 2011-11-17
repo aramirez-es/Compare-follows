@@ -179,7 +179,7 @@ class TwitterAuthModelTest extends \PHPUnit_Framework_TestCase
             $last_call_to_get = $index;
             $this->twitter_model_mock->expects( $this->at( $index ) )
                 ->method( 'get' )
-                ->will( $this->returnValue( $users[$user] ) );
+                ->will( $this->returnValue( array( 'ids' => $users[$user] ) ) );
         }
 
         $this->twitter_model_mock->expects( $this->at( ++$last_call_to_get ) )

@@ -171,10 +171,12 @@ class TwitterAuthModel extends TwitterAuthAdapter
      */
     protected function getFriendsByUsername( $username, $friend_type )
     {
-        return (array) $this->get(
+        $friends_response = (array) $this->get(
             $this->getUrlByFriendType( $friend_type ),
             array( 'screen_name' => $username )
         );
+
+        return isset( $friends_response['ids'] ) ? $friends_response['ids'] : array();
     }
 
     /**
